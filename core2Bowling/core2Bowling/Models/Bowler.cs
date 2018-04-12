@@ -10,6 +10,8 @@ namespace core2Bowling.Models
     public class Bowler
     {
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        [StringLength(20)]
+        [Required]
         [Display(Name = "아이디")]
         public string BowlerID { get; set; }
 
@@ -23,13 +25,11 @@ namespace core2Bowling.Models
         [Display(Name = "소속")]
         public string Group { get; set; }
         
-        [Display(Name = "핸디")]
-        public int Handicap { get; set; }
-
-        [Display(Name = "평균")]
-        public int GameAverage { get; set; }
 
         [Display(Name = "탈퇴")]
         public bool InActivity { get; set; }
+
+        public BowlerAverage BowlerAverage { get; set; }
+        public ICollection<TeamMember> TeamMembers { get; set; }
     }
 } 

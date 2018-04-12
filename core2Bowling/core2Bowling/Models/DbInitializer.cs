@@ -19,18 +19,38 @@ namespace core2Bowling.Models
 
             var bowlers = new Bowler[]
             {
-               new Bowler{ BowlerID="rp001", Name="백두산", Group="RedPin", Handicap=0, GameAverage=170 },
-               new Bowler{ BowlerID="rp002", Name="한라산", Group="RedPin", Handicap=10, GameAverage=160 },
-               new Bowler{ BowlerID="rp003", Name="설악산", Group="RedPin", Handicap=0,  GameAverage=140 },
-               new Bowler{ BowlerID="rp005", Name="태백산", Group="RedPin", Handicap=0,  GameAverage=150 },
-               new Bowler{ BowlerID="rp004", Name="임시", Group="RedPin", Handicap=0, InActivity=true,  GameAverage=140 },
-                          
-               new Bowler{ BowlerID="fg001", Name="낙동강", Group="family", Handicap=0, InActivity=false, GameAverage=160 }
+               new Bowler{ BowlerID="rp001", Name="백두산", Group="RedPin" },
+               new Bowler{ BowlerID="rp002", Name="한라산", Group="RedPin" },
+               new Bowler{ BowlerID="rp003", Name="설악산", Group="RedPin"},
+               new Bowler{ BowlerID="rp004", Name="임시", Group="RedPin", InActivity=true },
+
+               new Bowler{ BowlerID="rp005", Name="태백산", Group="RedPin" },
+
+               new Bowler{ BowlerID="fg001", Name="낙동강", Group="family", InActivity=true }
             };
             
             foreach (Bowler b in bowlers)
             {
                 context.Bowlers.Add(b);
+            }
+            context.SaveChanges();
+
+            var bowlerAverage = new BowlerAverage[]
+            {
+
+                new BowlerAverage{BowlerID="rp001", Average=150, Handicap=0},
+                new BowlerAverage{BowlerID="rp002", Average=160, Handicap=15},
+                new BowlerAverage{BowlerID="rp003", Average=170, Handicap=0},
+                new BowlerAverage{BowlerID="rp004", Average=180, Handicap=0},
+                new BowlerAverage{BowlerID="rp005", Average=190, Handicap=15},
+
+                new BowlerAverage{BowlerID="fg001", Average=200, Handicap=0}
+
+            };
+
+            foreach (var a in bowlerAverage)
+            {
+                context.BowlerAverages.Add(a);
             }
             context.SaveChanges();
 

@@ -1,0 +1,69 @@
+﻿@model IEnumerable<core2Bowling.Models.Bowler>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h2>Index</h2>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.BowlerID)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Group)
+            </th>
+
+            <th>
+                @Html.DisplayNameFor(model => model.BowlerAverage.Average)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.BowlerAverage.Handicap)
+            </th>
+
+            <th>
+                @Html.DisplayNameFor(model => model.InActivity)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.BowlerID)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Group)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.BowlerAverage.Average)
+
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.BowlerAverage.Handicap)
+
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.InActivity)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.BowlerID">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.BowlerID">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.BowlerID">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
