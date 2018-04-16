@@ -18,7 +18,7 @@ namespace core2Bowling.Models
         public int ID { get; set; }
 
         [DataType(DataType.DateTime)]
-        [DisplayFormat(DataFormatString = "{0:yy-MM-dd hh:mm}", ApplyFormatInEditMode = true)]
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd hh:mm}")]
         [Display(Name = "경기일")]
         public DateTime Playtime { get; set; }
 

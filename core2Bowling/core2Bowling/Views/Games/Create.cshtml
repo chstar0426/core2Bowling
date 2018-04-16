@@ -1,0 +1,94 @@
+﻿@model core2Bowling.Models.Game
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h2>Create</h2>
+
+<h4>Game</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Playtime" class="control-label"></label>
+                <input asp-for="Playtime" class="form-control" />
+                <span asp-validation-for="Playtime" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Place" class="control-label"></label>
+                <select class="form-control" id="optPlace" name="optPlace">
+                    <option value="현대볼링장">현대볼링장</option>
+                    <option value="동산볼링장">동산볼링장</option>
+                    <option value="삼능볼링장">삼능볼링장</option>
+                    <option value="">직접입력</option>
+                </select>
+                <input asp-for="Place" class="form-control" />
+                <span asp-validation-for="Place" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="GameKind" class="control-label"></label>
+                <select asp-for="GameKind" class="form-control"
+                        asp-items="@Html.GetEnumSelectList(typeof(GameKind))"></select>
+                <span asp-validation-for="GameKind" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="GameContent" class="control-label"></label>
+                <input asp-for="GameContent" class="form-control" />
+                <span asp-validation-for="GameContent" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Group" class="control-label"></label>
+                <select class="form-control" asp-for="Group">
+                    <option value="">--팀 선택--</option>
+                    <option value="Redpin">RedPin</option>
+                    <option value="Family">Family</option>
+                </select>
+                @*<input asp-for="Group" class="form-control" />*@
+                <span asp-validation-for="Group" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-default" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+
+    $(function () {
+        $("#Place").hide();
+        $("#Place").val($("#optPlace").val());
+
+        $("#optPlace").change(function () {
+            //alert($(this).val());
+            //alert($(this).children("option:selected").text());
+
+
+            $("#Place").val($(this).val());
+
+            if ($(this).val() == "") {
+                $("#Place").show().focus();
+
+            } else {
+                $("#Place").hide();
+
+            }
+        });
+
+
+    });
+    </script>
+
+}

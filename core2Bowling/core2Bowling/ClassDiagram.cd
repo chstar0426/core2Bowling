@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="core2Bowling.Models.Bowler">
+    <Position X="1.5" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AIAAAEAAAAAAAAAAAAAAAAQAAAIAQCAAAAAAAAAAAAA=</HashCode>
+      <FileName>Models\Bowler.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="core2Bowling.Models.BowlerAverage">
+    <Position X="1.5" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACAAAAAAAAAAAAAAAABAAAAAAAIAAAAAAAAAAAAAAAI=</HashCode>
+      <FileName>Models\BowlerAverage.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="core2Bowling.Models.Game">
+    <Position X="10.25" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAEAAAACAgAAAAAAAAAAAAAAEAEAAAEAAAAEAAAA=</HashCode>
+      <FileName>Models\Game.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="core2Bowling.Models.SubGame">
+    <Position X="10.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAACAAAAAAAgAAAAAEAAAAAAAgAAAAAAAAAAAIAAAA=</HashCode>
+      <FileName>Models\SubGame.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="core2Bowling.Models.Team">
+    <Position X="7.75" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AIAAAAAAAAAAggAAABAAAAAFAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Models\Team.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="core2Bowling.Models.TeamMember">
+    <Position X="4.5" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAgAgAAABAAAACAAIAAAAAEAAAAAEAAAA=</HashCode>
+      <FileName>Models\TeamMember.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Enum Name="core2Bowling.Models.GameKind" Collapsed="true">
+    <Position X="8.25" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAgAIAEAAAAAAAAQgAAAAAAAAA=</HashCode>
+      <FileName>Models\Game.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="맑은 고딕" Size="9" />
+</ClassDiagram>

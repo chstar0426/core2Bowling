@@ -55,44 +55,7 @@ namespace core2Bowling.Models
             context.SaveChanges();
 
 
-            var teams = new Team[]
-            {
-                new Team{SubGameID=1, TeamName="AAA", TeamOrder=0},
-                new Team{SubGameID=1, TeamName="BBB", TeamOrder=1 },
-                               
-                new Team{SubGameID=2, TeamName="AAA", TeamOrder=0},
-                new Team{SubGameID=2, TeamName="BBB", TeamOrder=1 },
-            };
-
-            foreach (Team t in teams)
-            {
-                context.Teams.Add(t);
-            }
-            context.SaveChanges();
-
-
-            var teamMembers = new TeamMember[]
-           {
-                new TeamMember{TeamID=1, BowlerID="rp001", Sequence=0, Score=175 },
-                new TeamMember{TeamID=1, BowlerID="rp005", Sequence=1, Score=137},
-                new TeamMember{TeamID=2, BowlerID="rp002", Sequence=0, Score=154 },
-                new TeamMember{TeamID=2, BowlerID="rp003", Sequence=1, Score=167},
-
-
-                new TeamMember{TeamID=3, BowlerID="rp001", Sequence=0},
-                new TeamMember{TeamID=3, BowlerID="rp005", Sequence=1},
-                new TeamMember{TeamID=4, BowlerID="rp002", Sequence=0 } ,
-                new TeamMember{TeamID=4, BowlerID="rp003", Sequence=1}
-           };
-
-
-            foreach (TeamMember t in teamMembers)
-            {
-                context.TeamMembers.Add(t);
-            }
-            context.SaveChanges();
-
-
+           
             var games = new Game[]
             {
                 new Game{ Playtime=DateTime.Parse("2018-04-10 20:00"), GameKind=GameKind.정기전, Group="RedPin", Place="현대볼링장", GameContent="1/4"}
@@ -104,6 +67,63 @@ namespace core2Bowling.Models
                 context.Games.Add(item);
             }
             context.SaveChanges();
+
+
+
+            var subGames = new SubGame[]
+            {
+                new SubGame{ GameID=1, Round=1},
+                new SubGame{ GameID=1, Round=2},
+
+            };
+
+            foreach (var item in subGames)
+            {
+                context.SubGames.Add(item);
+            }
+            context.SaveChanges();
+
+            var teams = new Team[]
+           {
+                new Team{SubGameID=1, TeamName="AAA", TeamOrder=0},
+                new Team{SubGameID=1, TeamName="BBB", TeamOrder=1 },
+
+                new Team{SubGameID=2, TeamName="AAA", TeamOrder=0},
+                new Team{SubGameID=2, TeamName="BBB", TeamOrder=1 },
+           };
+
+            foreach (Team t in teams)
+            {
+                context.Teams.Add(t);
+            }
+            context.SaveChanges();
+
+
+            var teamMembers = new TeamMember[]
+           {
+                 new TeamMember{TeamID=1, BowlerID="rp001", Sequence=0, Score=175 },
+                 new TeamMember{TeamID=1, BowlerID="rp002", Sequence=1, Score=132 },
+
+                 new TeamMember{TeamID=2, BowlerID="rp003", Sequence=0, Score=168 },
+                 new TeamMember{TeamID=2, BowlerID="rp005", Sequence=1, Score=165 },
+
+                  new TeamMember{TeamID=3, BowlerID="rp001", Sequence=0, Score=0 },
+                 new TeamMember{TeamID=3, BowlerID="rp002", Sequence=1, Score=0 },
+
+                 new TeamMember{TeamID=4, BowlerID="rp003", Sequence=0, Score=0 },
+                 new TeamMember{TeamID=4, BowlerID="rp005", Sequence=1, Score=0 },
+
+
+           };
+
+
+            foreach (TeamMember t in teamMembers)
+            {
+                context.TeamMembers.Add(t);
+            }
+            context.SaveChanges();
+
+
         }
 
 

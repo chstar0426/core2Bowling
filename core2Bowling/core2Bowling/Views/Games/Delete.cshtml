@@ -1,0 +1,51 @@
+﻿@model core2Bowling.Models.Game
+
+@{
+    ViewData["Title"] = "Delete";
+}
+
+<h2>Delete</h2>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>Game</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Playtime)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Playtime)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Place)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Place)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.GameKind)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.GameKind)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.GameContent)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.GameContent)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Group)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Group)
+        </dd>
+    </dl>
+    
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="ID" />
+        <input type="submit" value="Delete" class="btn btn-default" /> |
+        <a asp-action="Index">Back to List</a>
+    </form>
+</div>
