@@ -1,0 +1,108 @@
+﻿@model IEnumerable<core2Bowling.Models.TeamMember>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h2>Index</h2>
+
+<p>
+    <a asp-action="Create">Create New</a>
+   
+</p>
+<div>
+
+
+</div>
+<table class="table">
+    <thead>
+        <tr class="text-center">
+            <th></th>
+            <th>
+                @Html.DisplayNameFor(model => model.Team.TeamName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Bowler.Name)
+            </th>
+
+            <th>
+                @Html.DisplayNameFor(model => model.Score)
+            </th>
+
+            <th>
+                @Html.DisplayNameFor(model => model.Sequence)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @{var round = 0;
+            var roundCnt = 0;
+            var teamName = string.Empty;
+            
+            var downScoreCount = 0;}
+        @foreach (var item in Model)
+        {
+            string styleScore = "";
+
+            if (item.Score > 200)
+            {
+                styleScore = "overScore";
+            }else if (item.Score - item.Bowler.BowlerAverage.Average < 0)
+            {
+                styleScore = "downScore";
+                downScoreCount++;
+            }
+        <tr>
+
+            @if (round != item.Team.SubGame.Round)
+            {
+                round = item.Team.SubGame.Round;
+                roundCnt = Model.Where(m => m.Team.SubGameID == round).Count();
+                <td rowspan="@roundCnt"><a asp-action="Edit" asp-route-id="@round">@round 게임</a></td>
+            }
+
+            @if (teamName != item.Team.TeamName)
+            {
+                teamName = item.Team.TeamName;
+                var ieTeam = Model.Where(m => m.Team.SubGameID == round && m.Team.TeamName == teamName);
+                
+                <td rowspan="@ieTeam.Count()">
+                    @teamName<br />
+                    @ieTeam.Sum(m => m.Score)
+                    <br /><br />
+                    @string.Format("{0:n0}", (ieTeam.Where(e => e.Score < e.Bowler.BowlerAverage.Average).Count() * 1000))
+
+                </td>
+
+
+            }
+
+            <td>
+                @Html.DisplayFor(modelItem => item.Bowler.Name)
+
+
+                @Html.DisplayFor(modelItem => item.Bowler.BowlerAverage.Average)
+                @if (item.Bowler.BowlerAverage.Handicap > 0)
+                {
+                    @:/ @Html.DisplayFor(modelitm => item.Bowler.BowlerAverage.Handicap)
+                }
+                
+            </td>
+            <td class="@styleScore">
+                @Html.DisplayFor(modelItem => item.Score)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Sequence)
+            </td>
+
+
+            <td>
+               
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+
+<div>벌금 : @string.Format("{0:n0}", downScoreCount * 1000)</div>

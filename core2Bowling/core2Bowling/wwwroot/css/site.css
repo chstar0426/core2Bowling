@@ -33,3 +33,15 @@
         display: none;
     }
 }
+
+
+/*------------------------------------*/
+
+.overScore {
+    color : red;
+}
+
+.downScore {
+    color: #0f0cf7;
+    
+}

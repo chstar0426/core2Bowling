@@ -1,0 +1,70 @@
+﻿@model IEnumerable<core2Bowling.Models.TeamMember>
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h2>Edit</h2>
+
+<h4>TeamMember</h4>
+<hr />
+
+<div class="row">
+
+    <form asp-action="Edit">
+
+        <div asp-validation-summary="All" class="text-danger"></div>
+        @{ bool bTeam = false;
+            string teamName = string.Empty; }
+
+        @foreach (var item in Model)
+        {
+            if(teamName != item.Team.TeamName)
+            {
+                if(bTeam == true)
+                {
+                    @:</div>
+                }
+                bTeam = true;
+                teamName = item.Team.TeamName;
+
+                @:<div class="col-xs-4">@(teamName + "팀")
+            }
+
+
+            for (int i = 0; i < 1; i++)
+            {
+                      
+                <div class="form-group">
+                    <label class="control-label">
+                        @item.Bowler.Name
+                        @if (item.Bowler.BowlerAverage.Handicap>0)
+	                    {
+		                      @:/ @item.Bowler.BowlerAverage.Handicap
+                        }
+                    
+                    </label>
+                    <input type="number"  name="inputScores" value="@(item.Score - item.Bowler.BowlerAverage.Handicap)" class="form-control" />
+                    <span asp-validation-for="@item.Score" class="text-danger"></span>
+                </div>
+                
+            }
+            
+        }
+                <div>
+                    <input type="submit" value="Save" class="btn btn-default" />
+                </div>
+
+        </form>
+
+    </div>
+
+
+    <div>
+        <input type="submit" value="Save" class="btn btn-default" />
+        <a asp-action="Index">Back to List</a>
+    </div>
+
+    @section Scripts {
+        @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    }
