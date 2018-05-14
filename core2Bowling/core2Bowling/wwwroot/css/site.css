@@ -1,4 +1,5 @@
-﻿body {
+﻿@import url('site.css');
+body {
     padding-top: 50px;
     padding-bottom: 20px;
 }
@@ -44,4 +45,52 @@
 .downScore {
     color: #0f0cf7;
     
+}
+
+/*-----------------------------------------------*/
+
+/*/////////////////////////////////////////////////////////////*/
+#lstMember {
+    height: 530px;
+    margin-bottom: 10px;
+    max-width: none;
+}
+
+.style-select select {
+    height: 150px;
+    margin-bottom: 10px;
+    padding: 0;
+    max-width: none;
+}
+
+.style-select select option {
+    padding: 4px 10px 4px 10px;
+}
+
+    .style-select select option:hover {
+        background: #EEEEEE;
+    }
+
+.add-btns {
+    padding: 0;
+}
+
+.add-btns input {
+    margin-top: 25px;
+    width: 100%;
+}
+
+.selected-left {
+    float: left;
+    width: 80%;
+}
+
+.selected-right {
+    float: left;
+}
+
+.selected-right button {
+    display: block;
+    margin-left: 4px;
+    margin-bottom: 2px;
 }

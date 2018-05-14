@@ -75,6 +75,158 @@ namespace core2Bowling.Controllers
             return View(game);
         }
 
+        // POST: Games/Create
+        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
+        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AutoPractice()
+        {
+            
+            var game = new Game
+            {
+                GameKind = GameKind.연습게임,
+                Group = "Family",
+                Place = "현대볼링장",
+                Playtime = DateTime.Now
+
+            };
+
+            await _context.Games.AddAsync(game);
+
+            var subgame = new SubGame
+            {
+                GameID = game.ID,
+                Round = 1
+
+            };
+
+            await _context.SubGames.AddAsync (subgame);
+
+            var team = new Team
+            {
+                SubGameID = subgame.ID,
+                TeamName = "A",
+                TeamOrder = 0
+            };
+
+            await _context.Teams.AddAsync(team);
+
+            var teamMember = new TeamMember
+            {
+                BowlerID = "fg001",
+                Score = 0,
+                Sequence = 0,
+                TeamID = team.ID
+
+            };
+
+            await _context.TeamMembers.AddAsync(teamMember);
+
+            await _context.SaveChangesAsync();
+
+
+            return RedirectToAction(nameof(Index));
+
+        }
+
+        // POST: Games/Create
+        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
+        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AutoPlay()
+        {
+
+            var game = new Game
+            {
+                GameKind = GameKind.비정기전,
+                Group = "Family",
+                Place = "현대볼링장",
+                Playtime = DateTime.Now
+
+            };
+
+            await _context.Games.AddAsync(game);
+
+            var subgame = new SubGame
+            {
+                GameID = game.ID,
+                Round = 1
+
+            };
+
+            await _context.SubGames.AddAsync(subgame);
+
+            var teams = new List<Team>()
+            {
+                new Team
+                {
+                    SubGameID = subgame.ID,
+                    TeamName = "A",
+                    TeamOrder = 0
+
+                },
+                new Team
+                {
+                    SubGameID = subgame.ID,
+                    TeamName = "B",
+                    TeamOrder = 1
+
+                }
+
+            };
+
+            await _context.Teams.AddRangeAsync(teams);
+
+            var teamMembers = new List<TeamMember>()
+            {
+                new TeamMember
+                {
+                    BowlerID = "rp001",
+                    Score = 0,
+                    Sequence = 0,
+                    TeamID = teams[0].ID
+                    
+                },
+                new TeamMember
+                {
+                    BowlerID = "rp002",
+                    Score = 0,
+                    Sequence = 1,
+                    TeamID = teams[0].ID
+
+                },
+                new TeamMember
+                {
+                    BowlerID = "rp003",
+                    Score = 0,
+                    Sequence = 0,
+                    TeamID = teams[1].ID
+
+                },
+                new TeamMember
+                {
+                    BowlerID = "rp004",
+                    Score = 0,
+                    Sequence = 1,
+                    TeamID = teams[1].ID
+
+                }
+
+            };
+
+            await _context.TeamMembers.AddRangeAsync(teamMembers);
+
+            await _context.SaveChangesAsync();
+
+
+            return RedirectToAction(nameof(Index));
+
+        }
+
+
+
         // GET: Games/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
@@ -137,6 +289,7 @@ namespace core2Bowling.Controllers
 
             var game = await _context.Games
                 .SingleOrDefaultAsync(m => m.ID == id);
+
             if (game == null)
             {
                 return NotFound();
@@ -154,6 +307,7 @@ namespace core2Bowling.Controllers
             _context.Games.Remove(game);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+
         }
 
         private bool GameExists(int id)

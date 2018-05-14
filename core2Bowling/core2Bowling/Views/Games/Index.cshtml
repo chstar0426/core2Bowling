@@ -6,9 +6,20 @@
 
 <h2>Index</h2>
 
-<p>
+<div>
     <a asp-action="Create">Create New</a>
-</p>
+    <form asp-action="AutoPractice">
+        <div class="form-group">
+            <input type="submit" value="자동연습" class="btn btn-default" />
+        </div>
+    </form>
+    <form asp-action="AutoPlay">
+        <div class="form-group">
+            <input type="submit" value="자동경기" class="btn btn-default" />
+        </div>
+    </form>
+
+</div>
 <table class="table">
     <thead>
         <tr>
@@ -51,7 +62,8 @@
             <td>
                 <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
                 <a asp-action="Details" asp-route-id="@item.ID">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
+                <a asp-action="Delete" asp-route-id="@item.ID">Delete</a> | 
+                <a asp-controller="TeamMembers" asp-action="Index" asp-route-id="@item.ID">경기설정</a>
             </td>
         </tr>
 }

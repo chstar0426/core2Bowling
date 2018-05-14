@@ -85,11 +85,11 @@ namespace core2Bowling.Models
 
             var teams = new Team[]
            {
-                new Team{SubGameID=1, TeamName="AAA", TeamOrder=0},
-                new Team{SubGameID=1, TeamName="BBB", TeamOrder=1 },
+                new Team{SubGameID=1, TeamName="A", TeamOrder=0},
+                new Team{SubGameID=1, TeamName="B", TeamOrder=1 },
 
-                new Team{SubGameID=2, TeamName="AAA", TeamOrder=0},
-                new Team{SubGameID=2, TeamName="BBB", TeamOrder=1 },
+                new Team{SubGameID=2, TeamName="A", TeamOrder=0},
+                new Team{SubGameID=2, TeamName="B", TeamOrder=1 },
            };
 
             foreach (Team t in teams)

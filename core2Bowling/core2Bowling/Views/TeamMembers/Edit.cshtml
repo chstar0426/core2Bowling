@@ -2,12 +2,16 @@
 
 @{
     ViewData["Title"] = "Edit";
+    var game = Model.First().Team.SubGame.Game;
 }
 
 <h2>Edit</h2>
 
 <h4>TeamMember</h4>
 <hr />
+
+@game.Playtime @game.GameKind @Model.First().Team.SubGame.Round 번째 게임
+
 
 <div class="row">
 
@@ -19,41 +23,42 @@
 
         @foreach (var item in Model)
         {
-            if(teamName != item.Team.TeamName)
+            if (teamName != item.Team.TeamName)
             {
-                if(bTeam == true)
+                if (bTeam == true)
                 {
                     @:</div>
                 }
                 bTeam = true;
                 teamName = item.Team.TeamName;
 
-                @:<div class="col-xs-4">@(teamName + "팀")
+                @:<div class="col-xs-4">
+                    @(teamName + "팀")
             }
 
 
-            for (int i = 0; i < 1; i++)
-            {
-                      
-                <div class="form-group">
-                    <label class="control-label">
-                        @item.Bowler.Name
-                        @if (item.Bowler.BowlerAverage.Handicap>0)
-	                    {
-		                      @:/ @item.Bowler.BowlerAverage.Handicap
-                        }
-                    
-                    </label>
-                    <input type="number"  name="inputScores" value="@(item.Score - item.Bowler.BowlerAverage.Handicap)" class="form-control" />
-                    <span asp-validation-for="@item.Score" class="text-danger"></span>
-                </div>
-                
-            }
-            
+        for (int i = 0; i < 1; i++)
+        {
+
+            <div class="form-group">
+                <label class="control-label">
+                    @item.Bowler.Name
+                    @if (item.Bowler.BowlerAverage.Handicap > 0)
+                    {
+                        @:/ @item.Bowler.BowlerAverage.Handicap
+                    }
+
+                </label>
+                <input type="number" name="inputScores" value="@(item.Score - item.Bowler.BowlerAverage.Handicap)" class="form-control" />
+                <span asp-validation-for="@item.Score" class="text-danger"></span>
+            </div>
+
         }
-                <div>
-                    <input type="submit" value="Save" class="btn btn-default" />
-                </div>
+
+    }
+        <div>
+            <input type="submit" value="Save" class="btn btn-default" />
+        </div>
 
         </form>
 
@@ -61,8 +66,8 @@
 
 
     <div>
-        <input type="submit" value="Save" class="btn btn-default" />
-        <a asp-action="Index">Back to List</a>
+       
+        <a asp-action="Index" asp-route-id="@game.ID">Back to List</a>
     </div>
 
     @section Scripts {
