@@ -19,7 +19,7 @@ namespace core2Bowling.Controllers
         }
 
         // GET: TeamMembers
-        public async Task<IActionResult> Index(int? id)
+        public async Task<IActionResult> IndexVertical(int? id)
         {
           
             if (id == null)
@@ -34,17 +34,106 @@ namespace core2Bowling.Controllers
                 .Include(t => t.Team)
                     .ThenInclude(s => s.SubGame)
                 .Where(t=>t.Team.SubGame.GameID==id)
-                .OrderBy(t => t.Team.SubGameID)
+                .OrderBy(t => t.Team.SubGame.Round)
                 .ThenBy(t => t.Team.TeamOrder)
                 .ThenBy(t => t.Sequence)
                 .AsNoTracking();
 
-            ViewData["Game"] = _context.Games.Where(g => g.ID == id).SingleOrDefault();
+            ViewData["Game"] = _context.Games.Include(g=>g.SubGames).Where(g => g.ID == id).SingleOrDefault();
             
 
 
 
             return View(await bowlingContext.ToListAsync());
+
+        }
+
+        // GET: TeamMembers
+        public async Task<IActionResult> Index(int? id)
+        {
+
+            if (id == null)
+            {
+                return NotFound();
+
+            }
+
+            var bowlingContext = _context.TeamMembers
+                .Include(t => t.Bowler)
+                    .ThenInclude(b => b.BowlerAverage)
+                .Include(t => t.Team)
+                    .ThenInclude(s => s.SubGame)
+                .Where(t => t.Team.SubGame.GameID == id)
+                .OrderBy(t => t.Team.SubGame.Round)
+                .ThenBy(t => t.Sequence)
+                .ThenBy(t => t.Team.TeamOrder)
+                .AsNoTracking();
+
+            ViewData["Game"] = _context.Games.Include(g => g.SubGames).Where(g => g.ID == id).SingleOrDefault();
+
+
+
+
+            return View(await bowlingContext.ToListAsync());
+
+        }
+
+        // GET: TeamMembers
+        public async Task<IActionResult> IndexGame(int? id)
+        {
+            
+
+            if (id == null)
+            {
+                return NotFound();
+
+            }
+
+            var bowlingContext = await _context.TeamMembers
+                .Include(t => t.Bowler)
+                    .ThenInclude(b => b.BowlerAverage)
+                .Include(t => t.Team)
+                    .ThenInclude(s => s.SubGame)
+                .Where(t => t.Team.SubGame.GameID == id)
+                .OrderBy(t => t.Team.SubGame.Round)
+                .AsNoTracking().ToListAsync();  //ToList()후 GroupBy사용해야 Include기능 발희
+
+
+            var returnValue = bowlingContext.GroupBy(t => t.BowlerID)
+                //.OrderByDescending(g => g.Average(a => a.Score));
+                .OrderByDescending(g => g.Average(a => a.Score) - (g.FirstOrDefault().Bowler.BowlerAverage.Average));
+
+            // 위의 두 명령을 합쳐서 표시하니 GroupBy에 에러 발생하여 위와같이 분리함
+            //var returnValue = _context.TeamMembers
+            //    .Include(t => t.Bowler)
+            //        .ThenInclude(b => b.BowlerAverage)
+            //    .Include(t => t.Team)
+            //        .ThenInclude(s => s.SubGame)
+            //    .Where(t => t.Team.SubGame.GameID == id)
+            //    .OrderBy(t => t.Team.SubGame.Round)
+            //    .AsNoTracking().ToList().GroupBy(t => t.BowlerID)
+            //    .OrderBy(g => (g.Sum(a => a.Score)));
+
+            //var bowlingContext = _context.TeamMembers
+            //    .Include(t => t.Bowler)
+            //        .ThenInclude(b => b.BowlerAverage)
+            //    .Include(t => t.Team)
+            //        .ThenInclude(s => s.SubGame)
+            //    .Where(t => t.Team.SubGame.GameID == id)
+            //    .OrderBy(t => t.BowlerID)
+            //    .ThenBy(t => t.Team.SubGame.Round)
+            //    .AsNoTracking();
+
+
+
+            ViewData["Game"] = _context.Games.Where(g => g.ID == id).Include(s => s.SubGames).SingleOrDefault();
+
+
+
+
+            //return View(await bowlingContext.ToListAsync());
+            return View(returnValue);
+          
 
         }
 
@@ -214,7 +303,7 @@ namespace core2Bowling.Controllers
                 return NotFound();
             }
 
-            var gameId = _context.SubGames.Single(g => g.ID == Id).GameID;
+            var game = _context.SubGames.Single(g => g.ID == Id).GameID;
 
             var teamMembers = await _context.TeamMembers
                  .Include(t => t.Bowler)
@@ -357,7 +446,7 @@ namespace core2Bowling.Controllers
 
             _context.SaveChanges();
 
-            return RedirectToAction(nameof(Index), new { Id = gameId });
+            return RedirectToAction(nameof(Index), new { Id = game });
 
 
 
@@ -427,7 +516,7 @@ namespace core2Bowling.Controllers
 
             //return RedirectToAction(nameof(Edit), new { Id = subgame.ID });
 
-            return RedirectToAction(nameof(Index), new { Id = gameId});
+            return RedirectToAction(nameof(Index), new { Id = gameId, game=round});
 
         }
 
@@ -436,14 +525,22 @@ namespace core2Bowling.Controllers
         {
 
             var gameId = _context.SubGames.Single(g => g.ID == Id).GameID;
-            var subgame = _context.SubGames.Single(g => g.ID == Id);
+            
+            var delSubgame = _context.SubGames.Single(g => g.ID == Id);
+            var updateSubgames = _context.SubGames.Where(t => t.GameID == delSubgame.GameID && t.Round > delSubgame.Round);
 
-           
-            _context.Remove(subgame);
+            foreach (var us in updateSubgames)
+            {
+                us.Round--;
+            }
+
+            //_context.Update(updateSubgames);  //필요업음
+            _context.Remove(delSubgame);
+            
 
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Index), new { Id = gameId });
+            return RedirectToAction(nameof(Index), new { Id = gameId });     
 
         }
 
@@ -522,7 +619,10 @@ namespace core2Bowling.Controllers
                 }
 
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index), new { Id = teamMembers.First().Team.SubGame.GameID });
+
+                var game = teamMembers.First().Team.SubGame;
+                return RedirectToAction(nameof(Index), new { Id = game.GameID, game= game.Round });
+               
             }
             catch (DbUpdateException)
             {

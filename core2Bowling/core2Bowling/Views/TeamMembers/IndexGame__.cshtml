@@ -1,0 +1,127 @@
+﻿@model IEnumerable<core2Bowling.Models.TeamMember>
+
+@{
+    ViewData["Title"] = "Index";
+    var game = (Game)ViewData["Game"];
+    var gameNum = game.SubGames.Max(s => s.Round);
+}
+<h2>Index</h2>
+
+<p>
+    <a asp-action="CreateTeam" asp-route-id="@game.ID">Create New</a>
+
+</p>
+<div>
+    @game.Playtime @game.GameKind
+
+</div>
+
+
+<table class="table">
+    <thead>
+        <tr class="text-center">
+            <th>
+                @Html.DisplayNameFor(model => model.Team.TeamName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Bowler.Name)
+            </th>
+            @for (int i = 0; i < gameNum; i++)
+            {
+                <th>
+                    @Html.DisplayNameFor(model => model.Score)
+                </th>
+            }
+            <th>합계</th>
+            <th>평균</th>
+
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            string bowlerid = string.Empty;
+            int cnt = 0;
+            int total = 0;
+            int perCnt = 0;
+
+        }
+
+
+        @foreach (var item in Model)
+        {
+
+
+            if (item.BowlerID != bowlerid)
+            {
+                cnt = 1;
+                total = 0;
+                perCnt = 1;
+                bowlerid = item.BowlerID;
+
+                @:<tr>
+                    <td>@Html.DisplayFor(modelItem => item.Team.TeamName)  </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Bowler.Name)
+                        @Html.DisplayFor(modelItem => item.BowlerID)
+                        @Html.DisplayFor(modelItem => item.Sequence)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Score)
+                    </td>
+
+
+            }
+            else
+            {
+
+                if (item.Team.SubGame.Round == cnt)
+                {
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Score)
+                    </td>
+
+                }
+                else
+                {
+                    for (int j = cnt; j < item.Team.SubGame.Round; j++)
+                    {
+                        <td>/</td>
+                        cnt++;
+
+                    }
+
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Score)
+                    </td>
+
+                }
+            }
+            @if (cnt == gameNum)
+            {
+                <td>@total</td>
+                <td>@(total/perCnt)</td>
+                @:</tr>
+            }
+            else
+            {
+                total += item.Score;
+                perCnt++;
+                cnt++;
+
+            }
+            
+
+         }
+
+    </tbody>
+</table>
+
+
+<ul>
+
+
+    @foreach (var item in Model)
+    {
+        <li>@item.Team.TeamName  @item.Bowler.Name  @item.Team.SubGame.Round @item.Score </li>
+    }
+</ul>

@@ -3,6 +3,8 @@
 @{
     ViewData["Title"] = "Index";
     var game = (Game)ViewData["Game"];
+    int queryGame = Context.Request.Query["game"].ToString() == "" ? 1 : Convert.ToInt32(Context.Request.Query["game"]);
+
 }
 <h2>Index</h2>
 
@@ -14,111 +16,202 @@
     @game.Playtime @game.GameKind
 
 </div>
-<table class="table">
-    <thead>
-        <tr class="text-center">
-            <th></th>
-            <th>
-                @Html.DisplayNameFor(model => model.Team.TeamName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Bowler.Name)
-            </th>
 
-            <th>
-                @Html.DisplayNameFor(model => model.Score)
-            </th>
+<div class="tabbable-panel">
+    <div class="tabbable-line">
+        <ul class="nav nav-tabs ">
 
-            <th>
-                @Html.DisplayNameFor(model => model.Sequence)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @{
-            var round = 0;
-            int roundID = 0;
-            var roundCnt = 0;
-            var teamName = string.Empty;
-
-            var downScoreCount = 0;}
-        @foreach (var item in Model)
-        {
-            string styleScore = "";
-
-            if (item.Score > 200)
+            @for (int i = 1; i < game.SubGames.Count() + 1; i++)
             {
-                styleScore = "overScore";
-            }
-            else if (item.Score - item.Bowler.BowlerAverage.Average < 0)
-            {
-                styleScore = "downScore";
-                downScoreCount++;
-            }
-            <tr>
-
-                @if (round != item.Team.SubGame.Round)
+                string selectActive = string.Empty;
+                if (i == queryGame)
                 {
-                    teamName = string.Empty;
+                    selectActive = "active";
+                }
+                <li class="@selectActive">
+                    <a href="#tab_game_@i" data-toggle="tab">
+                        @i  경기
+                    </a>
+                </li>
+
+            }
+
+        </ul>
+        <div class="tab-content">
+
+            @{
+                int teamSequence = -1;
+                int round = 0;
+
+                string teamName = string.Empty;
+                int roundID = 0;
+                int colcnt = 0;
+                int downScoreCount = 0;
+                int downScoreTotal = 0;
+
+                string winwin = string.Empty;
+                string winNext = string.Empty;
+
+            }
+
+            @foreach (var item in Model)
+            {
+
+
+                if (round != item.Team.SubGame.Round)
+                {
+                    if (round > 0)
+                    {
+
+                        @:</tr><tr>
+                            <td colspan="@(colcnt * 2)">
+                                <a asp-action="Edit" asp-route-id="@roundID">점수입력</a> |
+                                <a asp-action="EditTeam" asp-route-id="@roundID">팀수정</a> |
+                                <a asp-action="NextTeam" asp-route-id="@roundID">다음경기</a> |
+                                <a asp-action="DelTeam" asp-route-id="@roundID">경기삭제</a> //
+                                @string.Format("{0:n0}", (downScoreCount * 1000))
+                            </td>
+                            @:</tr></table></div>
+
+                        downScoreCount = 0;
+
+                    }
+
+
                     round = item.Team.SubGame.Round;
+
+                    string selectActive = string.Empty;
+                    if (round == queryGame)
+                    {
+                        selectActive = "active";
+                    }
+
+                @:<div class="tab-pane @selectActive" id="tab_game_@round"><table class="table table-bordered">
+
+                    teamName = string.Empty;
 
                     roundID = Model.Where(m => m.Team.SubGame.Round == round).First().Team.SubGameID;
 
+                    var listScore = new List<int>();
 
-                    roundCnt = Model.Where(m => m.Team.SubGameID == roundID).Count();
-                    <td rowspan="@roundCnt">
-                        @round 게임<br />
-                        <a asp-action="Edit" asp-route-id="@roundID">점수입력</a>
-                        <a asp-action="EditTeam" asp-route-id="@roundID">팀수정</a><br />
-                        <a asp-action="NextTeam" asp-route-id="@roundID">다음경기</a>
-                        <a asp-action="DelTeam" asp-route-id="@roundID">강제삭제</a>
-                    </td>
-                }
-
-                @if (teamName != item.Team.TeamName)
-                {
-                    teamName = item.Team.TeamName;
-                    var ieTeam = Model.Where(m => m.Team.SubGameID == roundID && m.Team.TeamName == teamName);
-
-                    <td rowspan="@ieTeam.Count()">
-                        @teamName<br />
-                        @ieTeam.Sum(m => m.Score)
-                        <br /><br />
-                        @string.Format("{0:n0}", (ieTeam.Where(e => e.Score < e.Bowler.BowlerAverage.Average).Count() * 1000))
-
-                    </td>
+                    var TeamScore = Model.Where(m => m.Team.SubGameID == roundID).GroupBy(t => t.Team.TeamName);
+                    colcnt = TeamScore.Count();    /* 팀수*/
 
 
-                }
-
-                <td>
-                    @Html.DisplayFor(modelItem => item.Bowler.Name)
-
-
-                    @Html.DisplayFor(modelItem => item.Bowler.BowlerAverage.Average)
-                    @if (item.Bowler.BowlerAverage.Handicap > 0)
+                    foreach (var g in TeamScore)
                     {
-                        @:/ @Html.DisplayFor(modelitm => item.Bowler.BowlerAverage.Handicap)
+                        var imsi = g.Sum(a => a.Score);
+                       
+                        if (g.Key==winwin)
+                        {
+                            imsi -= 100;
+                        }
+                        listScore.Add(imsi);
+
+                    };
+                    
+                    int maxTeamScore = listScore.Max();
+
+                        <tr>
+                            @{
+                                
+                                string winPre = string.Empty;
+                               
+
+                                winPre = winNext;
+
+                             }
+                            @foreach (var s in TeamScore)
+                            {
+                                string selectedRow = "";
+                                
+                                int sScore = s.Sum(a => a.Score) - ((winPre == s.Key) ? 100 : 0);
+
+
+                                if (sScore >= maxTeamScore)
+                                {
+                                    selectedRow = "success";
+                                    winNext = s.Key;
+                                    winwin = s.Key;
+                                }
+                                <td colspan="2" class="@selectedRow text-center">
+                                    @s.Key ( @sScore 점) @((winPre==s.Key) ? "*":"")
+                                </td>
+
+                              
+                            }
+
+                        </tr>
+
+                        
+                    
+                }
+
+
+                string styleScore = "";
+
+                if (item.Score > 200)
+                {
+                    styleScore = "overScore";
+                }
+                else if (item.Score - item.Bowler.BowlerAverage.Average < 0)
+                {
+                    styleScore = "downScore";
+                    downScoreCount++;
+                    downScoreTotal++;
+                }
+
+
+                if (item.Sequence != teamSequence)
+                {
+                    if (teamSequence > -1)
+                    {
+                            @:</tr>
+                        }
+
+                        teamSequence = item.Sequence;
+                        @:<tr>
+                        
+                        }
+
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Bowler.Name)
+
+                            (@Html.DisplayFor(modelItem => item.Bowler.BowlerAverage.Average)
+                            @if (item.Bowler.BowlerAverage.Handicap > 0)
+                            {
+                                @:/ @Html.DisplayFor(modelitm => item.Bowler.BowlerAverage.Handicap)
+                            })
+                        </td>
+                        <td class="@styleScore">@item.Score</td>
+                        @*<td>@item.Sequence</td>*@
+
+
                     }
 
-                </td>
-                <td class="@styleScore">
-                    @Html.DisplayFor(modelItem => item.Score)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Sequence)
-                </td>
+        </tr>
+        @*마지막테이블 종료*@
+        <tr>
+            <td colspan="@(colcnt*2)">
+                <a asp-action="Edit" asp-route-id="@roundID">점수입력</a> |
+                <a asp-action="EditTeam" asp-route-id="@roundID">팀수정</a> |
+                <a asp-action="NextTeam" asp-route-id="@roundID">다음경기</a> |
+                <a asp-action="DelTeam" asp-route-id="@roundID">경기삭제</a> //
+                @string.Format("{0:n0}", (downScoreCount * 1000))
+
+            </td>
+        </tr>
+    </table>
 
 
-                <td></td>
-            </tr>
-        }
-    </tbody>
-</table>
 
-<a asp-action="NextTeam" asp-route-id="@roundID">다음경기</a>
-<a asp-action="DelTeam" asp-route-id="@roundID">강제삭제</a>
+</div>
+</div>
+</div>
+
+@string.Format("{0:n0}", (downScoreTotal * 1000))
 
 
-<div>벌금 : @string.Format("{0:n0}", downScoreCount * 1000)</div>
+@section Styles {
+    <link href="~/css/tabCss.css" rel="stylesheet">
+}

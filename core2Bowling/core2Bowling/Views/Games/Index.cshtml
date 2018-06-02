@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Index";
+
 }
 
 <h2>Index</h2>
@@ -62,8 +63,10 @@
             <td>
                 <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
                 <a asp-action="Details" asp-route-id="@item.ID">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.ID">Delete</a> | 
+                <a asp-action="Delete" asp-route-id="@item.ID">Delete</a> |
                 <a asp-controller="TeamMembers" asp-action="Index" asp-route-id="@item.ID">경기설정</a>
+                <a asp-controller="TeamMembers" asp-action="IndexVertical" asp-route-id="@item.ID">경기설정2</a>
+                <a asp-controller="TeamMembers" asp-action="IndexGame" asp-route-id="@item.ID">경기설정3</a>
             </td>
         </tr>
 }
