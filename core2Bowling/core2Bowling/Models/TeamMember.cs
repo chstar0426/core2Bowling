@@ -20,6 +20,10 @@ namespace core2Bowling.Models
         [Range(0,300)]
         public int Score { get; set; }
 
+        [Display(Name = "에바")]
+        [Range(0, 300)]
+        public int Average { get; set; }
+
 
 
         public Team Team { get; set; }

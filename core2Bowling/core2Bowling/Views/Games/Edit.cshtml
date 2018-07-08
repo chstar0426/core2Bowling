@@ -14,11 +14,23 @@
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="ID" />
+
+            @*<div class="form-group">
+                    <label asp-for="Playtime" class="control-label"></label>
+                    <input asp-for="Playtime" class="form-control" />
+                    <span asp-validation-for="Playtime" class="text-danger"></span>
+                </div>*@
+
             <div class="form-group">
                 <label asp-for="Playtime" class="control-label"></label>
-                <input asp-for="Playtime" class="form-control" />
-                <span asp-validation-for="Playtime" class="text-danger"></span>
+                <div class="input-group date form_datetime" data-date="">
+                    <input type="text" class="form-control" readonly id="Playtime" name="Playtime" value="@Model.Playtime.ToString("yyyy-MM-dd tt hh:mm")" />
+
+                    <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+                </div>
+
             </div>
+
             <div class="form-group">
                 <label asp-for="Place" class="control-label"></label>
                 <select class="form-control" id="optPlace" name="optPlace">
@@ -33,8 +45,13 @@
             <div class="form-group">
                 <label asp-for="GameKind" class="control-label"></label>
                 <select asp-for="GameKind" class="form-control"
-                         asp-items="@Html.GetEnumSelectList(typeof(GameKind))"></select>
+                        asp-items="@Html.GetEnumSelectList(typeof(GameKind))"></select>
                 <span asp-validation-for="GameKind" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Penalty" class="control-label"></label>
+                <input asp-for="Penalty" class="form-control" />
+                <span asp-validation-for="Penalty" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="GameContent" class="control-label"></label>
@@ -63,11 +80,39 @@
     <a asp-action="Index">Back to List</a>
 </div>
 
+
+@section Styles{
+
+    <link href="~/lib/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet" />
+}
+
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script src="~/lib/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
+    <script src="~/lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.ko.js"></script>
+
 
 
     <script>
+
+        $('.form_datetime').datetimepicker({
+            language: 'ko',
+            weekStart: 0,
+            todayBtn: true,
+            autoclose: true,
+            todayHighlight: true,
+            startView: 2,
+            forceParse: true,
+            format: "yyyy-mm-dd P HH:ii",
+
+            minuteStep: 5,
+            showMeridian: true
+
+        });
+
+
 
         $(function () {
 
@@ -95,7 +140,7 @@
             }
 
             $("#optPlace").val("@Html.Raw(sPlace)");
-            
+
 
             if ($("#optPlace").val() == "") {
                 $("#Place").show().focus();

@@ -1,14 +1,24 @@
-﻿@model IEnumerable<TeamMember>
+﻿@model IEnumerable<core2Bowling.Models.TeamMember>
 
 @{
 
-    ViewData["Title"] = "Create";
-   
+    ViewData["Title"] = "Edit Team";
+    var game = Model.First().Team.SubGame.Game;
+
 }
 
-<h2>Team 수정 </h2>
+<h2>팀 수정  &nbsp;&nbsp;<small><i class="glyphicon glyphicon glyphicon-hand-right"></i> 팀 구성원을 변경합니다</small></h2>
+<hr />
+<div class="panel panel-info">
+    <div class="panel-heading">
+        <h3 class="panel-title">팀 수정</h3>
+    </div>
+    <div class="panel-body">
+        <div class="text-danger  pull-left">@game.GameKind  @(string.IsNullOrEmpty(game.GameContent) ? "" : "(" + game.GameContent + ")")</div>
+        &nbsp;&nbsp; | &nbsp;&nbsp;  @Model.First().Team.SubGame.Round 번째 게임  &nbsp;&nbsp; | &nbsp;&nbsp; @game.Playtime  &nbsp;&nbsp; | &nbsp;&nbsp; @game.Place <br />
+    </div>
+</div>
 
-<h4>팀 구성 </h4>
 <hr />
 
 
@@ -19,53 +29,60 @@
     <form asp-action="EditTeam" name="frm">
         <input type="hidden" id="Id" value="@Model" />
         <div class="row style-select">
-            <div class="col-md-6">
+            <div class="col-md-3">
                 <label class="control-label">회원</label>
 
                 @*<select multiple id="lstMember" name="lstMember" class="form-control" asp-items="ViewBag.BowlerID"></select>*@
                 <select multiple class="form-control" id="lstMember">
-                        @foreach (var item in ViewData["BowlerID"] as List<Bowler> )
-                        {
-                            <option value="@item.BowlerID">@item.Name (@item.BowlerAverage.Average/@item.BowlerAverage.Handicap)</option>
+                    @foreach (var item in ViewData["BowlerID"] as List<Bowler>)
+                    {
+                        <option value="@item.BowlerID">@item.Name (@item.BowlerAverage.Average/@item.BowlerAverage.Handicap)</option>
 
-                        }
+                    }
 
-                    </select>
+                </select>
             </div>
-            <div class="col-md-6 divTeamModul">
+            
+               
                 @{ var divTeam = String.Empty;
                     var selTeam = string.Empty;
-                    var teamAsc = 64;  //팀분류코드 (A팀, B팀)
                     var teamIds = Model.Select(t => t.TeamID).Distinct().ToArray();
-                    int cnt = 0;
+                    //int cnt = 0;
                 }
-                
-                
-                @for (int i = 0; i < teamIds.Count(); i++)
-                {
-                    divTeam = "dteam" + cnt;
-                    selTeam = "steam" + cnt;
-                    teamAsc++;
 
-                <div class="row divTeam" id="@divTeam">
-                    <input type="hidden" name="teamCnt" class="teamCnt" value="@Model.Where(t=>t.TeamID==teamIds[i]).Count()"/>
+            <div class="col-md-9">
+            @for (int j = 0; j < 2; j++)
+            {
+                var teamAsc = 63 + j;  //팀분류코드 (A팀, B팀)
+               
+
+                <div class="col-xs-6" id="teamDiv-@j">
+               @for (int i = j; i < teamIds.Count(); i = i + 2)
+               {
+                   divTeam = "dteam" + i;
+                   selTeam = "steam" + i;
+                   teamAsc=teamAsc + 2;
+                   
+
+                <div class="row divTeam" id="@divTeam" style="margin-bottom:15px">
+                    <input type="hidden" name="teamCnt" class="teamCnt" value="@Model.Where(t=>t.TeamID==teamIds[i]).Count()" />
                     <div class="col-md-3 col-sm-3 col-xs-3 add-btns">
                         <input type="button" value="추 가" class="btn btn-default" name="btnAdd" />
                     </div>
 
                     <div class="col-md-9 col-sm-9 col-xs-9">
-                        <label class="control-label">Team @((Char)teamAsc) 팀원</label>
+                        <label class="selected-left control-label">Team @((Char)teamAsc) 팀원</label>
                         <div class="selected-left">
                             <select multiple class="form-control" name="selectLst" id="@selTeam">
 
-                                @foreach (var item in Model.Where(t=>t.TeamID == teamIds[i]))
-                                {
+                                @foreach (var item in Model.Where(t => t.TeamID == teamIds[i]))
+                             {
                                     <option value="@item.BowlerID">@item.Bowler.Name (@item.Bowler.BowlerAverage.Average/@item.Bowler.BowlerAverage.Handicap)</option>
 
-                                }
+                             }
 
                             </select>
-                            
+
                         </div>
 
                         <div class="selected-right">
@@ -81,14 +98,18 @@
                         </div>
                     </div>
                 </div>
-                    cnt++;
 
-                }
+                 
+                   //cnt++;
+
+               }
+                </div>
+
+            }
 
             </div>
         </div>
-    </form>
-
+     </form>
 </div>
 
 
@@ -96,14 +117,12 @@
     <input type="button" class="btn btn-primary" name="btnSelAdd" value="추가" />
     <input type="button" class="btn btn-primary" name="btnSelDel" value="삭제" />
     <input type="button" class="btn btn-primary" name="btnSubmit" value="확인" />
+    <a class="btn btn-danger" asp-action="Index" asp-route-id="@game.ID" asp-route-game="@Model.First().Team.SubGame.Round">Back to List</a>
 </div>
 
 <div class="clearfix"></div>
 <hr />
 
-<div>
-    <a asp-action="Index" asp-route-Id="@Model">Back to List</a>
-</div>
 
 @section Scripts {
     <script src="~/js/jquery.selectlistactions.js"></script>
@@ -162,14 +181,14 @@
 
 
 
-                var addStaffText = '<div class="row divTeam" id="' + divTeam + '">' +
+                var addStaffText = '<div class="row divTeam" id="' + divTeam + '" style="margin-bottom:15px;">' +
                     '<input type="hidden" name="teamCnt" class="teamCnt" />' +
                     '<div class="col-md-3 col-sm-3 col-xs-3 add-btns">' +
                     '<input type="button" value="추 가" class="btn btn-default" name="btnAdd" />' +
                     '</div>' +
 
                     '<div class="col-md-9 col-sm-9 col-xs-9">' +
-                    '<label class="control-label">Team ' + teamAsc + ' 팀원</label>' +
+                    '<label class="selected-left control-label">Team ' + teamAsc + ' 팀원</label>' +
                     '<div class="selected-left">' +
                     '<select multiple class="form-control" name="selectLst" id="' + selTeam + '"></select>' +
                     '</div>' +
@@ -190,7 +209,11 @@
 
 
 
-                $(".divTeamModul").append(addStaffText);
+                var rev = (n % 2) ? "#teamDiv-1" : "#teamDiv-0";
+
+
+                //$(".divTeamModul").append(addStaffText);
+                $(rev).append(addStaffText);
 
                 e.preventDefault();
 
@@ -202,38 +225,31 @@
                     return;
                 }
                 var n = $('.divTeam').length - 1;
-                var node = $("select[name=selectLst]").eq(n);
+
+                var node = $("#dteam" + n + " select[name=selectLst]");
+
                 //alert(node.attr("id"));
 
 
-                if (n < 0) {
-                    alert("삭제할 팀이 없습니다.")
+                if (n < 1) {
+                    alert("마지막 1개의 팀은 삭제할 수 없습니다.");
                     return;
                 }
 
-                if ($("select[name=selectLst]").eq(n).children("option").size() > 0) {
-
+                if (node.children("option").size() > 0) {
                     $('select').moveAllToListAndDelete("#" + node.attr("id"), '#lstMember');
 
                 }
 
-                $(".divTeam").eq(n).remove();
+                $("#dteam" + n).remove();
 
-               
             });
-
-
-
-
 
 
             $("input[name=btnSubmit]").click(function (e) {
 
-                alert["전송준비"]
-
-                var i = 0;
-                reval = true;
-
+                
+                
 
                 $("select[name=selectLst]").each(function (index) {
 
@@ -245,20 +261,21 @@
 
                 });
 
-               
-                
+
+                reval = 0;
+
+
                 $("input[name=teamCnt]").each(function (idx, value) {
 
                     if ($(this).val() == 0) {
-                        i = idx + 1;
-                        reval = false;
+                        reval++;
                     }
 
 
                 });
 
-                if (!reval) {
-                    alert(i + "번째 팀원 구성 확인");
+                if (reval > 0 ) {
+                    alert(reval + "개의 팀원이 구성되지 않았습니다.");
                     return false;
                 }
 

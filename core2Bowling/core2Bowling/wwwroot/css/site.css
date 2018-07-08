@@ -82,15 +82,15 @@ body {
 
 .selected-left {
     float: left;
-    width: 80%;
+    width: 100%;
 }
 
 .selected-right {
-    float: left;
+    float: right;
 }
 
-.selected-right button {
+/*.selected-right button {
     display: block;
     margin-left: 4px;
     margin-bottom: 2px;
-}
+}*/

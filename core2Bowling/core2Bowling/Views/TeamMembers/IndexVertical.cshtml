@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Index";
     var game = (Game)ViewData["Game"];
+    int penalty = game.Penalty;
 }
 <h2>Index</h2>
 
@@ -58,7 +59,7 @@
             {
                 styleScore = "overScore";
             }
-            else if (item.Score - item.Bowler.BowlerAverage.Average < 0)
+            else if (item.Score - item.Average < 0)
             {
                 styleScore = "downScore";
                 downScoreCount++;
@@ -83,7 +84,7 @@
                     var imsi = g.Sum(s=>s.Score);
 
                     if(g.Key==winwin){
-                        imsi-=100;
+                        imsi-=penalty;
 
                     }
                     listScore.Add(imsi);
@@ -111,7 +112,7 @@
 
                 string selectedRow = "";
 
-                int sScore = ieTeam.Sum(a => a.Score) - (( wingame == item.Team.TeamName) ? 100 : 0);
+                int sScore = ieTeam.Sum(a => a.Score) - (( wingame == item.Team.TeamName) ? penalty : 0);
                
                 if (sScore >= maxTeamScore)
                 {
@@ -125,7 +126,7 @@
             @sScore @((wingame == item.Team.TeamName) ? "(" + ieTeam.Sum(a => a.Score).ToString() + ")" : "")
 
             <br /><br />
-            @string.Format("{0:n0}", (ieTeam.Where(e => e.Score < e.Bowler.BowlerAverage.Average).Count() * 1000))
+            @string.Format("{0:n0}", (ieTeam.Where(e => e.Score < e.Average).Count() * 1000))
 
         </td>
 
@@ -135,7 +136,7 @@
                 @Html.DisplayFor(modelItem => item.Bowler.Name)
 
 
-                @Html.DisplayFor(modelItem => item.Bowler.BowlerAverage.Average)
+                @Html.DisplayFor(modelItem => item.Average)
                 @if (item.Bowler.BowlerAverage.Handicap > 0)
                     {
         @:/ @Html.DisplayFor(modelitm => item.Bowler.BowlerAverage.Handicap)

@@ -1,0 +1,277 @@
+﻿@*@model IEnumerable<Bowler>*@
+@model int
+
+@{
+    ViewData["Title"] = "Create";
+    var game = (Game)ViewData["Game"];
+}
+
+<h2>팀구성 &nbsp;&nbsp;<small><i class="glyphicon glyphicon glyphicon-hand-right"></i> 팀을 편성하세요</small></h2>
+<hr />
+<div class="panel panel-info">
+    <div class="panel-heading">
+        <h3 class="panel-title">경기개요</h3>
+    </div>
+    <div class="panel-body">
+        <div class="text-danger  pull-left">@game.GameKind  @(string.IsNullOrEmpty(game.GameContent) ? "" : "(" + game.GameContent + ")") </div>
+        &nbsp;&nbsp; | &nbsp;&nbsp; @game.Playtime  &nbsp;&nbsp; | &nbsp;&nbsp; @game.Place
+    </div>
+</div>
+
+
+<div class="clearfix"></div>
+
+<div class="row">
+
+    <form asp-action="CreateTeam" name="frm">
+        <input type="hidden" id="Id" value="@Model" />
+        <div class="row style-select">
+            <div class="col-md-3">
+                <label class="control-label">회원</label>
+
+                @*<select multiple id="lstMember" name="lstMember" class="form-control" asp-items="ViewBag.BowlerID"></select>*@
+                <select multiple class="form-control" id="lstMember">
+                    @foreach (var item in ViewData["BowlerID"] as List<Bowler>)
+                    {
+                        <option value="@item.BowlerID">@item.Name (@item.BowlerAverage.Average/@item.BowlerAverage.Handicap)</option>
+
+                    }
+
+                </select>
+            </div>
+            <div class="col-md-4 divTeamModul">
+                @{ var divTeam = String.Empty;
+                    var selTeam = string.Empty;
+                    var teamAsc = 64;  //팀분류코드 (A팀, B팀)
+                }
+
+
+                @for (int i = 0; i < 2; i++)
+                {
+                    divTeam = "dteam" + i;
+                    selTeam = "steam" + i;
+                    teamAsc++;
+
+                    <div class="row divTeam" id="@divTeam">
+                        <input type="hidden" name="teamCnt" class="teamCnt" />
+                        <div class="col-md-3 col-sm-3 col-xs-3 add-btns">
+                            <input type="button" value="추 가" class="btn btn-default" name="btnAdd" />
+                        </div>
+
+                        <div class="col-md-9 col-sm-9 col-xs-9">
+                            <label class="selected-left control-label">Team @((Char)teamAsc) 팀원</label>
+                            <div class="selected-left">
+                                <select multiple class="form-control" name="selectLst" id="@selTeam"></select>
+
+                            </div>
+
+                            <div class="selected-right">
+                                <button type="button" class="btn btn-default btn-sm" name="btnUp">
+                                    <span class="glyphicon glyphicon-chevron-up"></span>
+                                </button>
+                                <button type="button" class="btn btn-default btn-sm" name="btnDown">
+                                    <span class="glyphicon glyphicon-chevron-down"></span>
+                                </button>
+                                <button type="button" class="btn btn-default btn-sm" name="btnRemove">
+                                    <span class="glyphicon glyphicon-remove"></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                }
+
+            </div>
+        </div>
+    </form>
+
+</div>
+
+
+<div class="pull-right">
+    <input type="button" class="btn btn-primary" name="btnSelAdd" value="추가" />
+    <input type="button" class="btn btn-primary" name="btnSelDel" value="삭제" />
+    <input type="button" class="btn btn-primary" name="btnSubmit" value="확인" />
+</div>
+
+<div class="clearfix"></div>
+<hr />
+
+<div>
+    <a asp-action="Index" asp-route-Id="@Model">Back to List</a>
+</div>
+
+@section Scripts {
+    <script src="~/js/jquery.selectlistactions.js"></script>
+
+    <script>
+        $(function () {
+
+            $(document).on("click", "input[name=btnAdd]", function () {
+
+                var node = $(this).parent().next().children().find('select');
+                //alert(node.attr("id"));
+                $('select').moveToListAndDelete('#lstMember', "#" + node.attr("id"));
+                e.preventDefault();
+
+            });
+
+            $(document).on("click", "button[name=btnUp]", function () {
+
+                var node = $(this).parent().prev().children('select');
+                //alert(node.attr("id"));
+                $('select').moveUpDown("#" + node.attr("id"), true, false);
+                e.preventDefault();
+
+
+            });
+            $(document).on("click", "button[name=btnDown]", function () {
+
+                var node = $(this).parent().prev().children('select');
+                //alert(node.attr("id"));
+                $('select').moveUpDown("#" + node.attr("id"), false, true);
+                e.preventDefault();
+
+            });
+
+            $(document).on("click", "button[name=btnRemove]", function () {
+
+                var node = $(this).parent().prev().children('select');
+                //alert(node.attr("id"));
+                $('select').moveToListAndDelete("#" + node.attr("id"), '#lstMember');
+                e.preventDefault();
+
+
+            });
+
+            //팀 관리 버튼
+
+            $("input[name=btnSelAdd]").click(function (e) {
+
+                var n = $('.divTeam').length;
+
+
+                var divTeam = "dteam" + n;
+                var selTeam = "steam" + n;
+                var teamAsc = String.fromCharCode(65 + n);
+
+
+
+
+                var addStaffText = '<div class="row divTeam" id="' + divTeam + '">' +
+                    '<input type="hidden" name="teamCnt" class="teamCnt" />' +
+                    '<div class="col-md-3 col-sm-3 col-xs-3 add-btns">' +
+                    '<input type="button" value="추 가" class="btn btn-default" name="btnAdd" />' +
+                    '</div>' +
+
+                    '<div class="col-md-9 col-sm-9 col-xs-9">' +
+                    '<label class="selected-left control-label">Team ' + teamAsc + ' 팀원</label>' +
+                    '<div class="selected-left">' +
+                    '<select multiple class="form-control" name="selectLst" id="' + selTeam + '"></select>' +
+                    '</div>' +
+
+                    '<div class="selected-right">' +
+                    '<button type="button" class="btn btn-default btn-sm" name="btnUp">' +
+                    '<span class="glyphicon glyphicon-chevron-up"></span>' +
+                    '</button>' +
+                    '<button type="button" class="btn btn-default btn-sm" name="btnDown">' +
+                    '<span class="glyphicon glyphicon-chevron-down"></span>' +
+                    '</button>' +
+                    '<button type="button" class="btn btn-default btn-sm" name="btnRemove">' +
+                    '<span class="glyphicon glyphicon-remove"></span>' +
+                    '</button>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>';
+
+
+
+                $(".divTeamModul").append(addStaffText);
+
+                e.preventDefault();
+
+            });
+
+            $("input[name=btnSelDel]").click(function (e) {
+
+                if (!confirm("삭제하시겠습니까")) {
+                    return;
+                }
+                var n = $('.divTeam').length - 1;
+                var node = $("select[name=selectLst]").eq(n);
+                //alert(node.attr("id"));
+
+
+                if (n < 0) {
+                    alert("삭제할 팀이 없습니다.")
+                    return;
+                }
+
+                if ($("select[name=selectLst]").eq(n).children("option").size() > 0) {
+
+                    $('select').moveAllToListAndDelete("#" + node.attr("id"), '#lstMember');
+
+                }
+
+                $(".divTeam").eq(n).remove();
+
+
+            });
+
+
+
+
+
+
+            $("input[name=btnSubmit]").click(function (e) {
+
+                alert["전송준비"]
+
+                var i = 0;
+                reval = true;
+
+
+                $("select[name=selectLst]").each(function (index) {
+
+                    //alert($(this).children("option").size());
+                    i = ($(this).children("option").size());
+
+                    $(this).children("option").prop("selected", true);
+                    $(".teamCnt").eq(index).val(i);
+
+                });
+
+
+
+                $("input[name=teamCnt]").each(function (idx, value) {
+
+                    if ($(this).val() == 0) {
+                        i = idx + 1;
+                        reval = false;
+                    }
+
+
+                });
+
+                if (!reval) {
+                    alert(i + "번째 팀원 구성 확인");
+                    return false;
+                }
+
+                $("form").submit();
+
+                e.preventDefault();
+
+
+            });
+
+
+        });
+
+
+
+
+    </script>
+
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

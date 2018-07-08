@@ -31,6 +31,10 @@ namespace core2Bowling.Models
         [Display(Name = "경기분류")]
         public GameKind GameKind { get; set; }
 
+
+        [Display(Name = "우승팀 차감")]
+        public int Penalty { get; set; }
+
         [StringLength(100)]
         [Display(Name = "간단설명")]
         public string GameContent { get; set; }

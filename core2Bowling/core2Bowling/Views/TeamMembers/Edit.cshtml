@@ -3,14 +3,24 @@
 @{
     ViewData["Title"] = "Edit";
     var game = Model.First().Team.SubGame.Game;
+    int temptc = Model.Select(m => m.Team.TeamName).Distinct().Count();
+    int teamCount = temptc > 4 ? 3 : 12/temptc;  //6개 기준
+
+    int teamRow = 0;
+
 }
 
-<h2>Edit</h2>
-
-<h4>TeamMember</h4>
+<h2>점수입력 &nbsp;&nbsp;<small><i class="glyphicon glyphicon glyphicon-hand-right"></i> 각 게임에 대한 상세 기록입니다</small></h2>
 <hr />
-
-@game.Playtime @game.GameKind @Model.First().Team.SubGame.Round 번째 게임
+<div class="panel panel-info">
+    <div class="panel-heading">
+        <h3 class="panel-title">경기개요</h3>
+    </div>
+    <div class="panel-body">
+        <div class="text-danger  pull-left">@game.GameKind  @(string.IsNullOrEmpty(game.GameContent) ? "" : "(" + game.GameContent + ")")</div>
+        &nbsp;&nbsp; | &nbsp;&nbsp;  @Model.First().Team.SubGame.Round 번째 게임  &nbsp;&nbsp; | &nbsp;&nbsp; @game.Playtime  &nbsp;&nbsp; | &nbsp;&nbsp; @game.Place <br />
+    </div>
+</div>
 
 
 <div class="row">
@@ -19,27 +29,34 @@
 
         <div asp-validation-summary="All" class="text-danger"></div>
         @{ bool bTeam = false;
-            string teamName = string.Empty; }
+        string teamName = string.Empty; }
 
-        @foreach (var item in Model)
+    @foreach (var item in Model)
+    {
+
+
+        if (teamName != item.Team.TeamName)
         {
-            
-
-            if (teamName != item.Team.TeamName)
+            if (bTeam == true)
             {
-                if (bTeam == true)
+                teamRow++;
+                @:</div>
+
+                if (teamRow % 4 ==0)
                 {
-                    @:</div>
+                    @:<br /><div class="clearfix"></div>
                 }
-                bTeam = true;
-                teamName = item.Team.TeamName;
 
-                @:<div class="col-xs-4">
-                    @(teamName + "팀")
-
-                
             }
-            
+
+            bTeam = true;
+            teamName = item.Team.TeamName;
+
+        @:<div class="col-xs-@teamCount" style="margin-top:15px;border-right:1px solid green">
+              <p class="text-danger">@(teamName + "팀")</p>
+    
+        }
+
 
 
         for (int i = 0; i < 1; i++)
@@ -61,19 +78,18 @@
         }
 
     }
-        <div>
-            <input type="submit" value="Save" class="btn btn-default" />
-        </div>
-
-        </form>
-
     </div>
-
-
     <div>
-       
-        <a asp-action="Index" asp-route-id="@game.ID">Back to List</a>
+        <input type="submit" value="Save" class="btn btn-primary" />
+        <a class="btn btn-danger" asp-action="Index" asp-route-id="@game.ID" asp-route-game="@Model.First().Team.SubGame.Round">Back to List</a>
     </div>
+
+    </form>
+
+    
+
+
+
 
     @section Scripts {
         @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}

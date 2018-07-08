@@ -58,6 +58,7 @@ namespace core2Bowling.Controllers
 
             }
 
+            //가로 방식으로 입력되므로 Sequence를 먼저 소트후 TeamOrder을 소트
             var bowlingContext = _context.TeamMembers
                 .Include(t => t.Bowler)
                     .ThenInclude(b => b.BowlerAverage)
@@ -69,6 +70,10 @@ namespace core2Bowling.Controllers
                 .ThenBy(t => t.Team.TeamOrder)
                 .AsNoTracking();
 
+          
+
+
+
             ViewData["Game"] = _context.Games.Include(g => g.SubGames).Where(g => g.ID == id).SingleOrDefault();
 
 
@@ -79,29 +84,44 @@ namespace core2Bowling.Controllers
         }
 
         // GET: TeamMembers
-        public async Task<IActionResult> IndexGame(int? id)
+        public async Task<IActionResult> IndexGame(int? id, string sortOrder)
         {
-            
 
+            
             if (id == null)
             {
                 return NotFound();
 
             }
+            
 
             var bowlingContext = await _context.TeamMembers
                 .Include(t => t.Bowler)
                     .ThenInclude(b => b.BowlerAverage)
                 .Include(t => t.Team)
                     .ThenInclude(s => s.SubGame)
-                .Where(t => t.Team.SubGame.GameID == id)
-                .OrderBy(t => t.Team.SubGame.Round)
-                .AsNoTracking().ToListAsync();  //ToList()후 GroupBy사용해야 Include기능 발희
+                .Where(t => t.Team.SubGame.GameID == id && t.Bowler.Group != "Guest").AsNoTracking().ToListAsync();
+            //.OrderBy(t => t.Team.SubGame.Round)
+            //.OrderByDescending(t => t.Score)
+            //.AsNoTracking().ToListAsync();  //ToList()후 GroupBy사용해야 Include기능 발희
 
+            IOrderedEnumerable<IGrouping<string, TeamMember>> returnValue = null;
 
-            var returnValue = bowlingContext.GroupBy(t => t.BowlerID)
+            switch (sortOrder)
+            {
+                case "preAvg":
+                   returnValue = bowlingContext.OrderBy(t => t.Team.SubGame.Round).GroupBy(t => t.BowlerID)
+                        .OrderByDescending(g => g.Average(a => a.Score) - (g.FirstOrDefault().Average));
+                    break;
+                default:
+                    returnValue = bowlingContext.OrderBy(t => t.Team.SubGame.Round).GroupBy(t => t.BowlerID)
+                        .OrderByDescending(g => g.Average(a => a.Score));
+                    break;
+            }
+
+            //var returnValue = bowlingContext.OrderBy(t => t.Team.SubGame.Round).GroupBy(t => t.BowlerID)
+                //.OrderByDescending(g => g.Average(a => a.Score) - (g.FirstOrDefault().Average));
                 //.OrderByDescending(g => g.Average(a => a.Score));
-                .OrderByDescending(g => g.Average(a => a.Score) - (g.FirstOrDefault().Bowler.BowlerAverage.Average));
 
             // 위의 두 명령을 합쳐서 표시하니 GroupBy에 에러 발생하여 위와같이 분리함
             //var returnValue = _context.TeamMembers
@@ -127,14 +147,14 @@ namespace core2Bowling.Controllers
 
 
             ViewData["Game"] = _context.Games.Where(g => g.ID == id).Include(s => s.SubGames).SingleOrDefault();
-
-
-
+            
+            ViewData["bowlingContext"] = bowlingContext.OrderByDescending(t => t.Score).Take(10);
+            
+           
 
             //return View(await bowlingContext.ToListAsync());
             return View(returnValue);
           
-
         }
 
         // GET: TeamMembers/Details/5
@@ -163,11 +183,13 @@ namespace core2Bowling.Controllers
             
             var bowlers = await _context.Bowlers
                 .Include(b => b.BowlerAverage)
+                .OrderBy(b => b.Name)
                 .AsNoTracking().ToListAsync();
 
 
             ViewData["BowlerID"] = bowlers;
             //ViewData["BowlerID"] = new SelectList(bowlers, "BowlerID", "Name");
+            ViewData["Game"] = _context.Games.Include(g => g.SubGames).Where(g => g.ID == Id).SingleOrDefault();
 
             return View(Id);
 
@@ -182,7 +204,7 @@ namespace core2Bowling.Controllers
         {
             int teamcnt = 0;
             int cnt = 0;
-            int teamAsc = 65;
+           
             int round = 1;
             SubGame subgame = new SubGame();
             List<Team> team = new List<Team>();
@@ -198,36 +220,55 @@ namespace core2Bowling.Controllers
 
             await _context.SubGames.AddAsync(subgame);
 
+
+            int halfcnt = teamCnt.Count() % 2 == 0 ? teamCnt.Count() / 2 : teamCnt.Count() / 2  + 1;
+
             foreach (var item in teamCnt)
             {
+                int idx = 0;
+                   
+                if (teamcnt < halfcnt)
+                {
+                    idx = teamcnt * 2;
+
+                }
+                else
+                {
+                    idx = (teamcnt - halfcnt) * 2 + 1;
+
+
+                }
+
                 team.Add(new Team
                 {
                     SubGameID = subgame.ID,
-                    TeamName = ((Char)teamAsc).ToString(),
-                    TeamOrder = teamcnt
-
-
+                    TeamName = ((Char)(65 + idx)).ToString(),
+                    TeamOrder = idx
+                    
                 });
 
                 await _context.AddAsync(team[teamcnt]);
-
+                
                 for (int i = 0; i < item; i++)
                 {
+                    
+                    
                     teamMembers.Add(new TeamMember
                     {
                         BowlerID = selectLst[cnt],
                         Score = 0,
+                        Average = _context.BowlerAverages.Find(selectLst[cnt]).Average,
                         TeamID = team[teamcnt].ID,
                         Sequence = i
 
                     });
+
                     cnt++;
                     
                 }
                 
                 teamcnt++;
-                teamAsc++;
-
+                
             }
 
             await _context.AddRangeAsync(team);
@@ -235,6 +276,7 @@ namespace core2Bowling.Controllers
             await _context.AddRangeAsync(teamMembers);
 
             await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Index),new { Id = Id } );
             
         }
@@ -263,13 +305,15 @@ namespace core2Bowling.Controllers
                 .Include(t => t.Bowler)
                     .ThenInclude(b => b.BowlerAverage)
                 .Include(t => t.Team)
+                .ThenInclude(s => s.SubGame)
+                        .ThenInclude(g => g.Game)
                 .Where(t => t.Team.SubGameID == Id)
-                .OrderBy(t => t.TeamID)
+                .OrderBy(t => t.Team.TeamOrder)
                 .ThenBy(t => t.Sequence)
-
                 .AsNoTracking().ToListAsync();
 
 
+           
             var teamBowlers = teamMembers.Select(t => t.Bowler.BowlerID).ToList();
             //var bowlers = _context.Bowlers.ToList();
 
@@ -303,36 +347,35 @@ namespace core2Bowling.Controllers
                 return NotFound();
             }
 
-            var game = _context.SubGames.Single(g => g.ID == Id).GameID;
+            var subGame = _context.SubGames.Single(g => g.ID == Id);  //gameID, round
 
             var teamMembers = await _context.TeamMembers
                  .Include(t => t.Bowler)
                  //    .ThenInclude(b => b.BowlerAverage)  
                  .Include(t => t.Team)
                  .Where(t => t.Team.SubGameID == Id)
-                .OrderBy(t => t.TeamID)
+                .OrderBy(t => t.Team.TeamOrder)
                 .ThenBy(t => t.Sequence)
                  .ToListAsync();
 
-            //팀
-            
-            var EditTeamMembers = new List<TeamMember>();
+            //팀수정 
             var AddTeamMembers = new List<TeamMember>();
+            var EditTeamMembers = new List<TeamMember>();
             var EditMember = new TeamMember();
+
+
+            var imsiTMId = teamMembers.Select(t => t.Team.ID).Distinct().ToList();
+            int teamMemberTeamIDCnt = imsiTMId.Count();
+            List<Team> team = new List<Team>();
+            
 
             int cnt = 0;
             int tcnt = 0;
 
-
-            var teamMemberTeamID = teamMembers.Select(t => t.Team.ID).Distinct().ToList();
-            int teamMemberTeamIDCnt = teamMemberTeamID.Count();
-            List<Team> team = new List<Team>();
             int teamCntCnt = teamCnt.Count();
-            int teamAsc = 65;
 
 
-            //팀 정리 부분
-
+            //팀 추가 시 정리 부분
             if (teamMemberTeamIDCnt < teamCntCnt)
             {
                 for (int i = teamMemberTeamIDCnt; i < teamCntCnt; i++)
@@ -341,24 +384,34 @@ namespace core2Bowling.Controllers
                     team.Add(new Team
                     {
                         SubGameID = Id ?? 0,
-                        TeamName = ((Char)(teamAsc + i)).ToString(),
+                        TeamName = ((Char)(65 + i)).ToString(),
                         TeamOrder = i
 
                     });
 
                 }
-
+                
                  _context.AddRange(team);
 
 
-            }else if (teamMemberTeamIDCnt > teamCntCnt)
+                //팀 추가에 따른 팀 순서 새로 정리
+                foreach (var item in team)
+                {
+                    imsiTMId.Add(item.ID);
+                }
+                
+            }
+
+
+
+            //팀 삭제 시 정리 부분
+            if (teamMemberTeamIDCnt > teamCntCnt)
             {
                 for (int i = teamCntCnt; i < teamMemberTeamIDCnt; i++)
                 {
-
-                    team.Add(_context.Teams.Where(t => t.ID == teamMemberTeamID[i]).Single());
+                    team.Add(_context.Teams.Where(t => t.ID == imsiTMId[i]).Single());
                     //teamMembers.RemoveRange((teamMembers.Where(t => t.TeamID == teamMemberTeamID[i]).ToList());
-                    var imsi = (teamMembers.Where(t => t.TeamID == teamMemberTeamID[i]).ToList());
+                    var imsi = (teamMembers.Where(t => t.TeamID == imsiTMId[i]).ToList());
                     foreach (var item in imsi)
                     {
                         teamMembers.Remove(item);
@@ -368,13 +421,43 @@ namespace core2Bowling.Controllers
                     _context.RemoveRange(team);
                 }
 
+                //팀 추가에 따른 팀 순서 새로 정리
+                foreach (var item in team)
+                {
+                    imsiTMId.Remove(item.ID);
+                }
+
+                
+            }
+
+
+            //팀 추가 삭제에 따른 정리 부분
+            teamMemberTeamIDCnt = imsiTMId.Count();
+            int[] teamMemberTeamID = new int[teamMemberTeamIDCnt];
+
+
+            int halfcnt = teamMemberTeamIDCnt % 2 == 0 ? teamMemberTeamIDCnt / 2 : teamMemberTeamIDCnt / 2 + 1;
+
+
+            for (int i = 0; i < teamMemberTeamIDCnt; i++)
+            {
+                int idx = 0;
+
+                if (i < halfcnt)
+                {
+                    idx = i * 2;
+                }
+                else
+                {
+                    idx = (i - halfcnt) * 2 + 1;
+                }
+                teamMemberTeamID[i] = imsiTMId[idx];
             }
 
 
 
             foreach (var item in teamCnt)
             {
-
                
                 for (int i = 0; i < item; i++)
                 {
@@ -386,8 +469,8 @@ namespace core2Bowling.Controllers
                         {
                             BowlerID = selectLst[cnt],
                             Score = 0,
-                            TeamID = (teamMemberTeamIDCnt > tcnt) ? teamMemberTeamID[tcnt] : team[tcnt - (teamMemberTeamIDCnt)].ID,
-                           
+                            TeamID = teamMemberTeamID[tcnt], //(teamMemberTeamIDCnt > tcnt) ? teamMemberTeamID[tcnt] : team[tcnt - (teamMemberTeamIDCnt)].ID,
+                            Average = _context.BowlerAverages.Find(selectLst[cnt]).Average,
                             Sequence = i
 
                         });
@@ -396,10 +479,10 @@ namespace core2Bowling.Controllers
                     else
                     {
 
-                        if (EditMember.TeamID != ((teamMemberTeamIDCnt > tcnt) ? teamMemberTeamID[tcnt] : team[tcnt - (teamMemberTeamIDCnt)].ID) ||
+                        if (EditMember.TeamID != teamMemberTeamID[tcnt] || //((teamMemberTeamIDCnt > tcnt) ? teamMemberTeamID[tcnt] : team[tcnt - (teamMemberTeamIDCnt)].ID) ||
                             EditMember.Sequence != i)
                         {
-                            EditMember.TeamID = (teamMemberTeamIDCnt > tcnt) ? teamMemberTeamID[tcnt] : team[tcnt - (teamMemberTeamIDCnt)].ID;
+                            EditMember.TeamID = teamMemberTeamID[tcnt]; //(teamMemberTeamIDCnt > tcnt) ? teamMemberTeamID[tcnt] : team[tcnt - (teamMemberTeamIDCnt)].ID;
                             EditMember.Sequence = i;
                             EditTeamMembers.Add(EditMember);
 
@@ -412,17 +495,10 @@ namespace core2Bowling.Controllers
                     cnt++;
 
                 }
-
-               
-                teamAsc++;
+                
                 tcnt++;
+                
             }
-
-            //foreach (var item in teamMembers)
-            //{
-            //    DelTeamMembers.Add(new Models.Team { Id = item.id, TeamName = string.Empty, PlayOrder = 0 });
-
-            //}
 
             if (AddTeamMembers.Count()>0)
             {
@@ -440,14 +516,10 @@ namespace core2Bowling.Controllers
                 _context.RemoveRange(teamMembers);
             }
 
-            
-
-
-
             _context.SaveChanges();
 
-            return RedirectToAction(nameof(Index), new { Id = game });
 
+            return RedirectToAction(nameof(Index), new { Id = subGame.GameID, game = subGame.Round });
 
 
         }
@@ -504,6 +576,7 @@ namespace core2Bowling.Controllers
                 {
                     BowlerID=item.BowlerID,
                     Score=0,
+                    Average=item.Average,
                     Sequence=item.Sequence,
                     TeamID=team[i].ID
                 });
@@ -527,20 +600,21 @@ namespace core2Bowling.Controllers
             var gameId = _context.SubGames.Single(g => g.ID == Id).GameID;
             
             var delSubgame = _context.SubGames.Single(g => g.ID == Id);
-            var updateSubgames = _context.SubGames.Where(t => t.GameID == delSubgame.GameID && t.Round > delSubgame.Round);
 
+            var updateSubgames = _context.SubGames.Where(t => t.GameID == delSubgame.GameID && t.Round > delSubgame.Round);
+            
             foreach (var us in updateSubgames)
             {
                 us.Round--;
             }
 
-            //_context.Update(updateSubgames);  //필요업음
+            //_context.Update(updateSubgames);  //필요업음  
             _context.Remove(delSubgame);
             
 
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Index), new { Id = gameId });     
+            return RedirectToAction(nameof(Index), new { Id = gameId, game = delSubgame.Round >1? --delSubgame.Round : 1});     
 
         }
 
@@ -561,7 +635,7 @@ namespace core2Bowling.Controllers
                     .ThenInclude(s => s.SubGame)
                         .ThenInclude(g=>g.Game)
                 .Where(t=>t.Team.SubGameID==id)
-                 .OrderBy(t => t.TeamID)
+                 .OrderBy(t => t.Team.TeamOrder)
                 .ThenBy(t => t.Sequence)
                 .AsNoTracking().ToListAsync();
 

@@ -5,40 +5,50 @@
 
 }
 
-<h2>Index</h2>
-
+<h2>게임목록 &nbsp;&nbsp;<small><i class="glyphicon glyphicon glyphicon-hand-right"></i> 경기 현황입니다</small></h2>
+<hr />
 <div>
-    <a asp-action="Create">Create New</a>
-    <form asp-action="AutoPractice">
-        <div class="form-group">
-            <input type="submit" value="자동연습" class="btn btn-default" />
-        </div>
-    </form>
-    <form asp-action="AutoPlay">
-        <div class="form-group">
-            <input type="submit" value="자동경기" class="btn btn-default" />
-        </div>
-    </form>
+    <a asp-action="Create" class="pull-left btn btn-default ">Create New</a>
+    <div style="margin-top:15px">
+        <form asp-action="AutoPractice" class="pull-right">
+            <div class="form-group">
+                <input type="submit" value="자동연습" class="btn btn-primary" />
+            </div>
+        </form>
+       
+        <form asp-action="AutoPlay" class="pull-right" style="margin-right:15px">
+            <div class="form-group">
+                <input type="submit" value="자동경기" class="btn btn-warning" />
+            </div>
+        </form>
+    </div>
 
 </div>
+
+<div class="clearfix" style="border-bottom: 2px solid #e0dcdc; margin-bottom:-20px;"></div>
+
+
 <table class="table">
     <thead>
         <tr>
-                <th>
-                    @Html.DisplayNameFor(model => model.Playtime)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.Place)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.GameKind)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.GameContent)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.Group)
-                </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Playtime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Place)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.GameKind)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Penalty)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.GameContent)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Group)
+            </th>
             <th></th>
         </tr>
     </thead>
@@ -55,18 +65,22 @@
                 @Html.DisplayFor(modelItem => item.GameKind)
             </td>
             <td>
+                @Html.DisplayFor(modelItem => item.Penalty)
+            </td>
+            <td>
                 @Html.DisplayFor(modelItem => item.GameContent)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Group)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.ID">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.ID">Delete</a> |
-                <a asp-controller="TeamMembers" asp-action="Index" asp-route-id="@item.ID">경기설정</a>
-                <a asp-controller="TeamMembers" asp-action="IndexVertical" asp-route-id="@item.ID">경기설정2</a>
-                <a asp-controller="TeamMembers" asp-action="IndexGame" asp-route-id="@item.ID">경기설정3</a>
+                <a asp-controller="TeamMembers" asp-action="Index" asp-route-id="@item.ID" class="text-info">경기상세</a> |
+                <a asp-action="Edit" asp-route-id="@item.ID" class="text-warning">경기수정</a> |
+                @*<a asp-action="Details" asp-route-id="@item.ID">Details</a> |*@
+                <a asp-action="Delete" asp-route-id="@item.ID" class="text-danger">경기삭제</a>
+
+                @*<a asp-controller="TeamMembers" asp-action="IndexVertical" asp-route-id="@item.ID">경기설정2</a>
+        <a asp-controller="TeamMembers" asp-action="IndexGame" asp-route-id="@item.ID">경기설정3</a>*@
             </td>
         </tr>
 }
