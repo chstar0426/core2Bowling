@@ -26,7 +26,7 @@
 
 <div class="row">
 
-    <form asp-action="EditTeam" name="frm">
+    <form asp-action="EditTeam" name="frm" onsubmit="return checkForm()">
         <input type="hidden" id="Id" value="@Model" />
         <div class="row style-select">
             <div class="col-md-3">
@@ -35,90 +35,91 @@
                 @*<select multiple id="lstMember" name="lstMember" class="form-control" asp-items="ViewBag.BowlerID"></select>*@
                 <select multiple class="form-control" id="lstMember">
                     @foreach (var item in ViewData["BowlerID"] as List<Bowler>)
-                    {
-                        <option value="@item.BowlerID">@item.Name (@item.BowlerAverage.Average/@item.BowlerAverage.Handicap)</option>
-
-                    }
-
-                </select>
-            </div>
-            
-               
-                @{ var divTeam = String.Empty;
-                    var selTeam = string.Empty;
-                    var teamIds = Model.Select(t => t.TeamID).Distinct().ToArray();
-                    //int cnt = 0;
-                }
-
-            <div class="col-md-9">
-            @for (int j = 0; j < 2; j++)
-            {
-                var teamAsc = 63 + j;  //팀분류코드 (A팀, B팀)
-               
-
-                <div class="col-xs-6" id="teamDiv-@j">
-               @for (int i = j; i < teamIds.Count(); i = i + 2)
-               {
-                   divTeam = "dteam" + i;
-                   selTeam = "steam" + i;
-                   teamAsc=teamAsc + 2;
-                   
-
-                <div class="row divTeam" id="@divTeam" style="margin-bottom:15px">
-                    <input type="hidden" name="teamCnt" class="teamCnt" value="@Model.Where(t=>t.TeamID==teamIds[i]).Count()" />
-                    <div class="col-md-3 col-sm-3 col-xs-3 add-btns">
-                        <input type="button" value="추 가" class="btn btn-default" name="btnAdd" />
-                    </div>
-
-                    <div class="col-md-9 col-sm-9 col-xs-9">
-                        <label class="selected-left control-label">Team @((Char)teamAsc) 팀원</label>
-                        <div class="selected-left">
-                            <select multiple class="form-control" name="selectLst" id="@selTeam">
-
-                                @foreach (var item in Model.Where(t => t.TeamID == teamIds[i]))
-                             {
-                                    <option value="@item.BowlerID">@item.Bowler.Name (@item.Bowler.BowlerAverage.Average/@item.Bowler.BowlerAverage.Handicap)</option>
-
-                             }
-
-                            </select>
-
-                        </div>
-
-                        <div class="selected-right">
-                            <button type="button" class="btn btn-default btn-sm" name="btnUp">
-                                <span class="glyphicon glyphicon-chevron-up"></span>
-                            </button>
-                            <button type="button" class="btn btn-default btn-sm" name="btnDown">
-                                <span class="glyphicon glyphicon-chevron-down"></span>
-                            </button>
-                            <button type="button" class="btn btn-default btn-sm" name="btnRemove">
-                                <span class="glyphicon glyphicon-remove"></span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                 
-                   //cnt++;
-
-               }
-                </div>
+                {
+                    <option value="@item.BowlerID">@item.Name (@item.BowlerAverage.Average/@item.BowlerAverage.Handicap)</option>
 
             }
 
+                </select>
+            </div>
+
+
+            @{ var divTeam = String.Empty;
+            var selTeam = string.Empty;
+            var teamIds = Model.Select(t => t.TeamID).Distinct().ToArray();
+            //int cnt = 0;
+            }
+
+            <div class="col-md-9">
+                @for (int j = 0; j < 2; j++)
+            {
+                var teamAsc = 63 + j;  //팀분류코드 (A팀, B팀)
+
+
+                <div class="col-xs-6" id="teamDiv-@j">
+                    @for (int i = j; i < teamIds.Count(); i = i + 2)
+                {
+                    divTeam = "dteam" + i;
+                    selTeam = "steam" + i;
+                    teamAsc = teamAsc + 2;
+
+
+                    <div class="row divTeam" id="@divTeam" style="margin-bottom:15px">
+                        <input type="hidden" name="teamCnt" class="teamCnt" value="@Model.Where(t=>t.TeamID==teamIds[i]).Count()" />
+                        <div class="col-md-3 col-sm-3 col-xs-3 add-btns">
+                            <input type="button" value="추 가" class="btn btn-default" name="btnAdd" />
+                        </div>
+
+                        <div class="col-md-9 col-sm-9 col-xs-9">
+                            <label class="selected-left control-label">Team @((Char)teamAsc) 팀원</label>
+                            <div class="selected-left">
+                                <select multiple class="form-control" name="selectLst" id="@selTeam">
+
+                                    @foreach (var item in Model.Where(t => t.TeamID == teamIds[i]))
+                                {
+                                    <option value="@item.BowlerID">@item.Bowler.Name (@item.Bowler.BowlerAverage.Average/@item.Bowler.BowlerAverage.Handicap)</option>
+
+                            }
+
+                                </select>
+
+                            </div>
+
+                            <div class="selected-right">
+                                <button type="button" class="btn btn-default btn-sm" name="btnUp">
+                                    <span class="glyphicon glyphicon-chevron-up"></span>
+                                </button>
+                                <button type="button" class="btn btn-default btn-sm" name="btnDown">
+                                    <span class="glyphicon glyphicon-chevron-down"></span>
+                                </button>
+                                <button type="button" class="btn btn-default btn-sm" name="btnRemove">
+                                    <span class="glyphicon glyphicon-remove"></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+
+                //cnt++;
+
+            }
+                </div>
+
+        }
+
             </div>
         </div>
-     </form>
+        <div class="pull-right">
+            <input type="button" class="btn btn-primary" name="btnSelAdd" value="추가" />
+            <input type="button" class="btn btn-primary" name="btnSelDel" value="삭제" />
+            <input type="submit" value="확인" class="btn btn-primary" />
+            <a class="btn btn-danger" asp-action="Index" asp-route-id="@game.ID" asp-route-game="@Model.First().Team.SubGame.Round">Back to List</a>
+        </div>
+        
+    </form>
 </div>
 
 
-<div class="pull-right">
-    <input type="button" class="btn btn-primary" name="btnSelAdd" value="추가" />
-    <input type="button" class="btn btn-primary" name="btnSelDel" value="삭제" />
-    <input type="button" class="btn btn-primary" name="btnSubmit" value="확인" />
-    <a class="btn btn-danger" asp-action="Index" asp-route-id="@game.ID" asp-route-game="@Model.First().Team.SubGame.Round">Back to List</a>
-</div>
 
 <div class="clearfix"></div>
 <hr />
@@ -244,13 +245,12 @@
                 $("#dteam" + n).remove();
 
             });
+            
+        });
 
+        function checkForm() {
 
-            $("input[name=btnSubmit]").click(function (e) {
-
-                
-                
-
+           
                 $("select[name=selectLst]").each(function (index) {
 
                     //alert($(this).children("option").size());
@@ -274,20 +274,16 @@
 
                 });
 
-                if (reval > 0 ) {
+                if (reval > 0) {
                     alert(reval + "개의 팀원이 구성되지 않았습니다.");
                     return false;
                 }
 
-                $("form").submit();
+            return true;
+                
+            
 
-                e.preventDefault();
-
-
-            });
-
-
-        });
+        }
 
 
 

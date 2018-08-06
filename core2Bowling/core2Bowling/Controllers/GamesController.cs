@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using core2Bowling.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace core2Bowling.Controllers
 {
+    [Authorize]
     public class GamesController : Controller
     {
         private readonly BowlingContext _context;
@@ -21,7 +23,12 @@ namespace core2Bowling.Controllers
         // GET: Games
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Games.OrderByDescending(g=>g.Playtime).ToListAsync());
+
+            var group = User.FindFirst("UserGroup").Value;
+            group = group == "All" ? "" : group;
+
+            return View(await _context.Games.Where(g=>g.Group.Contains(group))
+                .OrderByDescending(g=>g.Playtime).ToListAsync());
         }
 
         // GET: Games/Details/5
@@ -44,6 +51,7 @@ namespace core2Bowling.Controllers
         }
 
         // GET: Games/Create
+        [Authorize(Policy = "AdminGroup")]
         public IActionResult Create()
         {
             return View();
@@ -176,6 +184,20 @@ namespace core2Bowling.Controllers
                     TeamName = "B",
                     TeamOrder = 1
 
+                },
+                new Team
+                {
+                    SubGameID = subgame.ID,
+                    TeamName = "C",
+                    TeamOrder = 2
+
+                },
+                new Team
+                {
+                    SubGameID = subgame.ID,
+                    TeamName = "D",
+                    TeamOrder = 3
+
                 }
 
             };
@@ -186,38 +208,38 @@ namespace core2Bowling.Controllers
             {
                 new TeamMember
                 {
-                    BowlerID = "rp001",
+                    BowlerID = "fg001",
                     Score = 0,
-                    Average= _context.BowlerAverages.Find("rp001").Average,
+                    Average= _context.BowlerAverages.Find("fp001").Average,
                     Sequence = 0,
                     TeamID = teams[0].ID
                     
                 },
                 new TeamMember
                 {
-                    BowlerID = "rp002",
+                    BowlerID = "fg002",
                     Score = 0,
-                   Average= _context.BowlerAverages.Find("rp002").Average,
-                    Sequence = 1,
-                    TeamID = teams[0].ID
-
-                },
-                new TeamMember
-                {
-                    BowlerID = "rp003",
-                    Score = 0,
-                    Average= _context.BowlerAverages.Find("rp003").Average,
+                   Average= _context.BowlerAverages.Find("fp002").Average,
                     Sequence = 0,
                     TeamID = teams[1].ID
 
                 },
                 new TeamMember
                 {
-                    BowlerID = "rp004",
+                    BowlerID = "fg003",
                     Score = 0,
-                   Average= _context.BowlerAverages.Find("rp004").Average,
-                    Sequence = 1,
-                    TeamID = teams[1].ID
+                    Average= _context.BowlerAverages.Find("fp003").Average,
+                    Sequence = 0,
+                    TeamID = teams[2].ID
+
+                },
+                new TeamMember
+                {
+                    BowlerID = "fg004",
+                    Score = 0,
+                   Average= _context.BowlerAverages.Find("fp004").Average,
+                    Sequence = 0,
+                    TeamID = teams[3].ID
 
                 }
 
@@ -235,6 +257,7 @@ namespace core2Bowling.Controllers
 
 
         // GET: Games/Edit/5
+        [Authorize(Policy = "AdminGroup")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -287,6 +310,7 @@ namespace core2Bowling.Controllers
         }
 
         // GET: Games/Delete/5
+        [Authorize(Policy = "AdminGroup")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)

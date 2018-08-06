@@ -4,10 +4,13 @@
     ViewData["Title"] = "Index";
     var game = (Game)ViewData["Game"];
     var teamMember = (IEnumerable<TeamMember>)ViewData["bowlingContext"];
-    
-    var gameNum = game.SubGames.Max(s => s.Round);
+
+    var gameNum = game.SubGames.Max(s => s.Round);      //전체경기의 최대 Round
 
     bool sortOrder = (Context.Request.Query["sortOrder"]=="preAvg"?true:false);
+
+    bool fine = false; //벌금표시
+
 }
 <h2>경기결과 &nbsp;&nbsp;<small><i class="glyphicon glyphicon glyphicon-hand-right"></i> 경기결과에 대한 상세 기록입니다</small></h2>
 <hr />
@@ -41,11 +44,10 @@
                     <th>
                         @(i + 1)  게임
                     </th>
-                }
+                 }
 
 
                 <th>합계</th>
-                <th>평균</th>
                 @{
                     string avgStyle = "text-danger";
                     string preAvgStyle = "";
@@ -57,16 +59,24 @@
                     }
 
 
-                    <th>
-                        <a asp-action="IndexGame" asp-route-Id="@ViewContext.RouteData.Values["Id"]" class="@avgStyle">점수등수</a>
-                    </th>
-                    <th>
-                        <a asp-action="IndexGame" asp-route-Id="@ViewContext.RouteData.Values["Id"]" asp-route-sortOrder="preAvg" class="@preAvgStyle">에버등수</a>
-                    </th>
+
+                    if (fine)
+                    {
+                        <th>
+                            <a asp-action="IndexGame" asp-route-Id="@ViewContext.RouteData.Values["Id"]" class="@avgStyle">점수등수</a>
+                        </th>
+                        <th>
+                            <a asp-action="IndexGame" asp-route-Id="@ViewContext.RouteData.Values["Id"]" asp-route-sortOrder="preAvg" class="@preAvgStyle">에버등수</a>
+                        </th>
+                        <th>벌금</th>
+
+                    }
+                    else
+                    {
+                        <th>평균</th>
+                    }
+
                 }
-
-
-                <th>벌금</th>
 
             </tr>
         </thead>
@@ -79,129 +89,142 @@
             }
             @foreach (var item in Model)
             {
-                int cnt = 1;
+                int cnt = 1;        //라운드 체크 변수
                 int total = 0;
-                int perCnt = 1;
-                int fine = 0;
+                int perCnt = 1;    //개인 라운드 개수
+                int pfine = 0;
 
 
                 var team = item.SelectMany(s => s.Team.TeamName).Distinct();
                 var avg = item.First().Average;
+                var lastRound = item.Last().Team.SubGame.Round;   //현재 경기자의 마지막 Round
+
                 var handi = item.First().Bowler.BowlerAverage.Handicap;
-                
+
+                string styleScore = "";
+
+                int imsiAvg = avg;
+
+
+                //평균 200이상은 200, 150이하는 150으로 계산
+                if (handi == 0 && avg > 199)
+                {
+                    imsiAvg = 200;
+                }
+                else if (handi == 15 && avg > 189)
+                {
+                    imsiAvg = 190;
+                }
+                else if (avg > 0 && avg < 150)
+                {
+                    imsiAvg = 150;
+                }
+
 
                 @:<tr>
-    <td>@orderNum</td>
+                <td>@orderNum</td>
 
-    foreach (var bw in item)
-    {
-
-        string classText = string.Empty;
-        if (bw.Score < avg)
-        {
-            classText = "text-primary";
-            fine++;
-        }
-        if (bw.Score > 199)
-        {
-
-            classText = "text-danger";
-        }
-
-
-        if (cnt == 1)
-        {
-
-            if (sortOrder && (orderNum == 1 || orderNum == 2))
-            {
-                winBowler[orderNum - 1] = bw.BowlerID;
-            }
-            <td>
-                @foreach (var t in team)
+                foreach (var bw in item)
                 {
-                    @(t + " ");
-                }
-            </td>
-            <td class="@(handi > 0 ? "text-success" : "")">
-                @Html.DisplayFor(modelItem => bw.Bowler.Name)
-            </td>
+                   
+                    styleScore = string.Empty;
+                    if (bw.Score - imsiAvg < 0)
+                    {
+                        styleScore = (fine == false ? "" : "downScore");
+                        pfine++;
+                    }
+                    if (bw.Score > 199)
+                    {
 
-        }
-
-        if (bw.Team.SubGame.Round == cnt)
-        {
-            <td class="@classText">
-                @Html.DisplayFor(modelItem => bw.Score)
-            </td>
-
-        }
-        else
-        {
-            for (int i = cnt; i < bw.Team.SubGame.Round; i++)
-            {
-                <td>/</td>
-
-                cnt++;
-            }
-
-            <td class="@classText">
-                @Html.DisplayFor(modelItem => bw.Score)
-            </td>
-
-        }
-
-
-
-
-        cnt++;
-        total += bw.Score;
-
-        @*@if (cnt>item.Count())
-                        {
-                            if (item.Count() == cnt)
-                            {
-                                for (int i = cnt; i < gameNum; i++)
-                                {
-            <link href="~/css/site.min.css" rel="stylesheet" />
-                                    <td>ggg</td>
-
-                                }
-
-                            }
-
-                        }*@
-
-        @*@if (cnt > gameNum || cnt > item.Count())*@
-        @if (cnt > item.Count())
-        {
-            if (gameNum > item.Count())
-            {
-                for (int i = cnt - 1; i < gameNum; i++)
-                {
-                    <td>/</td>
-                }
-
-            }
-
-            <td>@total</td>
-            <td>@avg</td>
-            <td>@(total / perCnt)</td>
-            <td>@((total / perCnt) - avg)</td>
-            <td>@string.Format("{0:n0}", (fine * 1000))</td>
-            @:</tr>
-                    totalFine = totalFine + fine;
+                        styleScore = "overScore";
                     }
 
-                    //위치 중요
-                    perCnt++;
+
+                    if (cnt == 1)
+                    {
+
+                        if (sortOrder && (orderNum == 1 || orderNum == 2))
+                        {
+                            winBowler[orderNum - 1] = bw.BowlerID;
+                        }
+                        <td>
+                            @foreach (var t in team)
+                            {
+                                @(t + " ");
+                            }
+                        </td>
+                        <td class="@(handi > 0 ? "text-success" : "")">
+                            @Html.DisplayFor(modelItem => bw.Bowler.Name)
+                        </td>
+
+                    }
+
+                    if (bw.Team.SubGame.Round == cnt)
+                    {
+                        <td class="@styleScore">
+                            @Html.DisplayFor(modelItem => bw.Score)
+                        </td>
+
+                    }
+                    else
+                    {
+                        for (int i = cnt; i < bw.Team.SubGame.Round; i++)
+                        {
+                            <td>/</td>
+
+                            cnt++;
+                        }
+
+                        <td class="@styleScore">
+                            @Html.DisplayFor(modelItem => bw.Score)
+                        </td>
+
+                    }
 
 
+
+
+                    cnt++;
+                    total += bw.Score;
+
+                    
+                    @*@if (cnt > gameNum || cnt > item.Count())*@
+                    @if (cnt > lastRound)
+                    {
+                        if (gameNum > item.Count())
+                        {
+                            for (int i = cnt - 1; i < gameNum; i++)
+                            {
+                                <td>/</td>
+                            }
+
+                        }
+
+                        <td>@total</td>
+                        <td>@Math.Round(total / Convert.ToDouble(perCnt)) @(fine==false?"": "(" + avg + ")")</td>
+
+                        if (fine)
+                        {
+                            <td>@(Math.Round(total / Convert.ToDouble(perCnt)) - avg)</td>
+                            <td>@string.Format("{0:n0}", (pfine * 1000))</td>
+                        }
+
+                        @:</tr>
+
+                        totalFine = totalFine + pfine;
+                     }
+
+                        //위치 중요
+                        perCnt++;
                 }
                 orderNum++;
+
             }
         </tbody>
     </table>
     </div>
+
+
     <div class="@(sortOrder ? "col-xs-3" : "visible-xs")">
         <table class="table">
             <thead>
@@ -243,5 +266,5 @@
 </div>
    
 
-    벌금 :  @string.Format("{0:n0}", (totalFine * 1000))
+@(fine==false ? "" : "벌금 : " + string.Format("{0:n0}", (totalFine * 1000)))
 

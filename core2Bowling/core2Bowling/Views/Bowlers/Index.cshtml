@@ -8,7 +8,13 @@
 <hr />
 
 <div>
-    <a asp-action="Create" class="pull-right btn btn-default ">신규회원</a>
+    @if (User.IsInRole("Admin"))
+    {
+        <a asp-action="Create" class="pull-right btn btn-default ">신규회원</a>
+    }else{
+        <p class="text-right text-primary">회원추가는 관리자에게 문의하세요</p>
+    }
+    
 </div>
 
     <table class="table">

@@ -8,7 +8,7 @@ namespace core2Bowling.Models
 {
     public enum GameKind
     {
-        정기전, 비정기전, 연습게임, 토요게임, 교류전
+        정기전, 비정기전, 개인기록
 
     }
 

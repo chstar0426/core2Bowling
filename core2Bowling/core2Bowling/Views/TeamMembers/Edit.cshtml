@@ -8,6 +8,8 @@
 
     int teamRow = 0;
 
+    bool inHandi = false;
+
 }
 
 <h2>점수입력 &nbsp;&nbsp;<small><i class="glyphicon glyphicon glyphicon-hand-right"></i> 각 게임에 대한 상세 기록입니다</small></h2>
@@ -65,13 +67,18 @@
             <div class="form-group">
                 <label class="control-label">
                     @item.Bowler.Name
-                    @if (item.Bowler.BowlerAverage.Handicap > 0)
+                    @if (inHandi)
                     {
-                        @:/ @item.Bowler.BowlerAverage.Handicap
-                    }
+                        if (item.Bowler.BowlerAverage.Handicap > 0)
+                        {
+                            @:/ @item.Bowler.BowlerAverage.Handicap
+                         }
+
+                     }
+
 
                 </label>
-                <input type="number" name="inputScores" value="@(item.Score - item.Bowler.BowlerAverage.Handicap)" class="form-control" />
+                <input type="number" name="inputScores" value="@(!inHandi ? item.Score : (item.Score - item.Bowler.BowlerAverage.Handicap))" class="form-control" />
                 <span asp-validation-for="@item.Score" class="text-danger"></span>
             </div>
 

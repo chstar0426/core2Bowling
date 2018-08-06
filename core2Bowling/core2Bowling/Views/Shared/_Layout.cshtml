@@ -13,7 +13,8 @@
         <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/css/bootstrap.min.css"
               asp-fallback-href="~/lib/bootstrap/dist/css/bootstrap.min.css"
               asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
-        <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
+        @*<link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />*@  @*site.min.css 파일 생성하는 방법 확인 / 우선  site.css를그대로 사용*@
+        <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     </environment>
 
     @RenderSection("Styles", required: false)
@@ -43,6 +44,8 @@
                     <li><a asp-area="" asp-controller="Home" asp-action="About">About</a></li>
                     <li><a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a></li>*@
                 </ul>
+
+                @await Html.PartialAsync("_LoginPartial");
             </div>
         </div>
     </nav>
@@ -59,10 +62,13 @@
                 @RenderBody()
             </div>
         </div>
-        
-        <hr />
+        <div class="clearfix"></div> 
+       <br />
+       <br />
         <footer>
-            <p>&copy; 2018 - csBowling Manager</p>
+            <hr />
+            <p class="pull-left text-primary">&copy; 2018 - csBowling Manager</p>
+            <p class="pull-right">Programmed by CS</p>
         </footer>
     </div>
 

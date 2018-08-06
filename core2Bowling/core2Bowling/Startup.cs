@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using core2Bowling.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -24,7 +25,24 @@ namespace core2Bowling
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<BowlingContext>(options =>
-        options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
+
+            services.AddDbContext<AccountContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("UserAccConnection")));
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("AdminGroup", policy => policy.RequireClaim("Role", "Manager", "Admin"));
+            });
+
+
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+             .AddCookie(options => {
+                 options.LoginPath = "/Login/UserLogin/";
+                 options.AccessDeniedPath = "/Login/Forbidden/";
+             });
+
 
 
             services.AddMvc();
@@ -44,12 +62,13 @@ namespace core2Bowling
             }
 
             app.UseStaticFiles();
+            app.UseAuthentication();
 
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    template: "{controller=Games}/{action=Index}/{id?}");
             });
         }
     }

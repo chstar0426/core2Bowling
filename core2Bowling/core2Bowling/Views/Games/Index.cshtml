@@ -7,25 +7,41 @@
 
 <h2>게임목록 &nbsp;&nbsp;<small><i class="glyphicon glyphicon glyphicon-hand-right"></i> 경기 현황입니다</small></h2>
 <hr />
-<div>
-    <a asp-action="Create" class="pull-left btn btn-default ">Create New</a>
-    <div style="margin-top:15px">
-        <form asp-action="AutoPractice" class="pull-right">
-            <div class="form-group">
-                <input type="submit" value="자동연습" class="btn btn-primary" />
-            </div>
-        </form>
-       
-        <form asp-action="AutoPlay" class="pull-right" style="margin-right:15px">
-            <div class="form-group">
-                <input type="submit" value="자동경기" class="btn btn-warning" />
-            </div>
-        </form>
-    </div>
+
+
+<div style="margin-top:15px;">
+
+    @if (User.IsInRole("Manager") || User.IsInRole("Admin"))
+    {
+        <a asp-action="Create" class="pull-left btn btn-default">Create New</a>
+    }
+
+    @if (User.IsInRole("Admin"))
+    {
+
+        <div>
+            <form asp-action="AutoPractice" class="pull-right">
+                <div class="form-group">
+                    <input type="submit" value="자동연습" class="btn btn-primary" />
+                </div>
+            </form>
+
+            <form asp-action="AutoPlay" class="pull-right" style="margin-right:15px">
+                <div class="form-group">
+                    <input type="submit" value="자동경기" class="btn btn-warning" />
+                </div>
+            </form>
+        </div>
+
+    }
+
 
 </div>
 
-<div class="clearfix" style="border-bottom: 2px solid #e0dcdc; margin-bottom:-20px;"></div>
+<div class="clearfix">
+    <div style="border-bottom: 2px solid #e0dcdc; margin-top:50px;">
+     </div>
+</div>
 
 
 <table class="table">
@@ -74,13 +90,18 @@
                 @Html.DisplayFor(modelItem => item.Group)
             </td>
             <td>
-                <a asp-controller="TeamMembers" asp-action="Index" asp-route-id="@item.ID" class="text-info">경기상세</a> |
-                <a asp-action="Edit" asp-route-id="@item.ID" class="text-warning">경기수정</a> |
-                @*<a asp-action="Details" asp-route-id="@item.ID">Details</a> |*@
-                <a asp-action="Delete" asp-route-id="@item.ID" class="text-danger">경기삭제</a>
+                <a asp-controller="TeamMembers" asp-action="Index" asp-route-id="@item.ID" class="text-info">경기상세</a>
+                @if (!User.IsInRole("Member"))
+                {
+                    @:| 
+                    <a asp-action="Edit" asp-route-id="@item.ID" class="text-warning">경기수정</a> @:|
+                    <a asp-action="Delete" asp-route-id="@item.ID" class="text-danger">경기삭제</a>
 
-                @*<a asp-controller="TeamMembers" asp-action="IndexVertical" asp-route-id="@item.ID">경기설정2</a>
-        <a asp-controller="TeamMembers" asp-action="IndexGame" asp-route-id="@item.ID">경기설정3</a>*@
+                }
+
+            @*<a asp-action="Details" asp-route-id="@item.ID">Details</a> |
+    <a asp-controller="TeamMembers" asp-action="IndexVertical" asp-route-id="@item.ID">경기설정2</a>
+    <a asp-controller="TeamMembers" asp-action="IndexGame" asp-route-id="@item.ID">경기설정3</a>*@
             </td>
         </tr>
 }

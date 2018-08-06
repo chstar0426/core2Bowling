@@ -6,9 +6,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using core2Bowling.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace core2Bowling.Controllers
 {
+    
+    [Authorize]
     public class TeamMembersController : Controller
     {
         private readonly BowlingContext _context;
@@ -41,9 +44,6 @@ namespace core2Bowling.Controllers
 
             ViewData["Game"] = _context.Games.Include(g=>g.SubGames).Where(g => g.ID == id).SingleOrDefault();
             
-
-
-
             return View(await bowlingContext.ToListAsync());
 
         }
@@ -51,7 +51,7 @@ namespace core2Bowling.Controllers
         // GET: TeamMembers
         public async Task<IActionResult> Index(int? id)
         {
-
+            
             if (id == null)
             {
                 return NotFound();
@@ -69,16 +69,9 @@ namespace core2Bowling.Controllers
                 .ThenBy(t => t.Sequence)
                 .ThenBy(t => t.Team.TeamOrder)
                 .AsNoTracking();
-
-          
-
-
-
+            
             ViewData["Game"] = _context.Games.Include(g => g.SubGames).Where(g => g.ID == id).SingleOrDefault();
-
-
-
-
+            
             return View(await bowlingContext.ToListAsync());
 
         }
@@ -87,23 +80,39 @@ namespace core2Bowling.Controllers
         public async Task<IActionResult> IndexGame(int? id, string sortOrder)
         {
 
-            
+            bool notGuest = false;
+
+
             if (id == null)
             {
                 return NotFound();
 
             }
             
+            var bowlingContext = new List<TeamMember>();
 
-            var bowlingContext = await _context.TeamMembers
+            if (notGuest)
+            {
+                bowlingContext = await _context.TeamMembers
+               .Include(t => t.Bowler)
+                   .ThenInclude(b => b.BowlerAverage)
+               .Include(t => t.Team)
+                   .ThenInclude(s => s.SubGame)
+               .Where(t => t.Team.SubGame.GameID == id && t.Bowler.Group != "zGroup").AsNoTracking().ToListAsync();
+
+                
+            }
+            else
+            {
+                bowlingContext = await _context.TeamMembers
                 .Include(t => t.Bowler)
                     .ThenInclude(b => b.BowlerAverage)
                 .Include(t => t.Team)
                     .ThenInclude(s => s.SubGame)
-                .Where(t => t.Team.SubGame.GameID == id && t.Bowler.Group != "Guest").AsNoTracking().ToListAsync();
-            //.OrderBy(t => t.Team.SubGame.Round)
-            //.OrderByDescending(t => t.Score)
-            //.AsNoTracking().ToListAsync();  //ToList()후 GroupBy사용해야 Include기능 발희
+                .Where(t => t.Team.SubGame.GameID == id).AsNoTracking().ToListAsync();
+
+
+            }
 
             IOrderedEnumerable<IGrouping<string, TeamMember>> returnValue = null;
 
@@ -178,18 +187,25 @@ namespace core2Bowling.Controllers
         }
 
         // GET: TeamMembers/Create
+        [Authorize(Policy = "AdminGroup")]
         public async Task<IActionResult> CreateTeam(int Id)
         {
+
+            var game = _context.Games.Include(g => g.SubGames).Where(g => g.ID == Id).SingleOrDefault();
+            var group =game.Group;
             
+
             var bowlers = await _context.Bowlers
                 .Include(b => b.BowlerAverage)
-                .OrderBy(b => b.Name)
+                .Where(b=>b.Group==group || b.Group=="zGroup")
+                .OrderBy(b => b.Group)
+                .ThenBy(b=>b.Name)
                 .AsNoTracking().ToListAsync();
 
 
             ViewData["BowlerID"] = bowlers;
             //ViewData["BowlerID"] = new SelectList(bowlers, "BowlerID", "Name");
-            ViewData["Game"] = _context.Games.Include(g => g.SubGames).Where(g => g.ID == Id).SingleOrDefault();
+            ViewData["Game"] = game;
 
             return View(Id);
 
@@ -202,6 +218,8 @@ namespace core2Bowling.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateTeam(int Id, int[] teamCnt, string[] selectLst)
         {
+
+            
             int teamcnt = 0;
             int cnt = 0;
            
@@ -277,11 +295,13 @@ namespace core2Bowling.Controllers
 
             await _context.SaveChangesAsync();
 
+          
             return RedirectToAction(nameof(Index),new { Id = Id } );
             
         }
 
         // GET: TeamMembers/Create
+        [Authorize(Policy = "AdminGroup")]
         public async Task<IActionResult> EditTeam(int? Id)
         {
             //SubGameId
@@ -311,14 +331,24 @@ namespace core2Bowling.Controllers
                 .OrderBy(t => t.Team.TeamOrder)
                 .ThenBy(t => t.Sequence)
                 .AsNoTracking().ToListAsync();
-
-
-           
+            
             var teamBowlers = teamMembers.Select(t => t.Bowler.BowlerID).ToList();
             //var bowlers = _context.Bowlers.ToList();
 
             var  remainBowlers= new List<Bowler>();
-            foreach (var item in _context.Bowlers.Include(t=>t.BowlerAverage))
+
+
+            var group = teamMembers.First().Bowler.Group;
+
+            var bowlers = await _context.Bowlers
+                .Include(b => b.BowlerAverage)
+                .Where(b => b.Group == group || b.Group == "zGroup")
+                 .OrderBy(b => b.Group)
+                .ThenBy(b => b.Name)
+                .AsNoTracking().ToListAsync();
+
+
+            foreach (var item in bowlers)
             {
                 if (!teamBowlers.Contains(item.BowlerID))
                 {
@@ -525,6 +555,7 @@ namespace core2Bowling.Controllers
         }
 
         // GET: TeamMembers/Create
+        [Authorize(Policy = "AdminGroup")]
         public async Task<IActionResult> NextTeam(int Id)
         {
 
@@ -594,6 +625,7 @@ namespace core2Bowling.Controllers
         }
 
         // GET: TeamMembers/Create
+        [Authorize(Policy = "AdminGroup")]
         public async Task<IActionResult> DelTeam(int Id)
         {
 
@@ -619,8 +651,9 @@ namespace core2Bowling.Controllers
         }
 
 
-            // GET: TeamMembers/Edit/5
-            public async Task<IActionResult> Edit(int? id)
+        // GET: TeamMembers/Edit/5
+        [Authorize(Policy = "AdminGroup")]
+        public async Task<IActionResult> Edit(int? id)
         {
            
             if (id == null)
@@ -656,6 +689,7 @@ namespace core2Bowling.Controllers
         public async Task<IActionResult> Edit(int? Id, int[] inputScores)
         {
 
+            bool inHandi = false;
             
             if (Id == null) 
             { 
@@ -668,7 +702,7 @@ namespace core2Bowling.Controllers
                .Include(t => t.Team)
                     .ThenInclude(s=>s.SubGame)
                .Where(t => t.Team.SubGameID == Id)
-                .OrderBy(t => t.TeamID)
+                .OrderBy(t => t.Team.TeamOrder)
                 .ThenBy(t => t.Sequence)
                .ToListAsync();
 
@@ -680,18 +714,23 @@ namespace core2Bowling.Controllers
             try
             {
                 int i = 0;
-                
+
+                var handiCap = 0;
+               
                 foreach (var item in teamMembers)
                 {
-                    if (item.Score != inputScores[i] + item.Bowler.BowlerAverage.Handicap)
+                    handiCap = inHandi == false ? 0 : item.Bowler.BowlerAverage.Handicap;
+
+                    if (item.Score != inputScores[i] + handiCap)
                     {
-                        item.Score = inputScores[i] + item.Bowler.BowlerAverage.Handicap;
+                        item.Score = inputScores[i] + handiCap;
                         _context.Update(item);
                     }
                     i++;
 
                 }
 
+          
                 await _context.SaveChangesAsync();
 
                 var game = teamMembers.First().Team.SubGame;

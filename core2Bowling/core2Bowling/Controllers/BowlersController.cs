@@ -6,9 +6,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using core2Bowling.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace core2Bowling.Controllers
 {
+
+    [Authorize(Policy = "AdminGroup")]
     public class BowlersController : Controller
     {
         private readonly BowlingContext _context;
@@ -21,10 +24,14 @@ namespace core2Bowling.Controllers
         // GET: Bowlers
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Bowlers//.Where(b=>b.Group=="RedPin")
-                .Include(b=>b.BowlerAverage)
-                .AsNoTracking()
-                .ToListAsync());
+          
+            var group = User.FindFirst("UserGroup").Value;
+            group = group == "All" ? "" : group;
+
+            return View(await _context.Bowlers.Where(b=>b.Group.Contains(group))
+            .Include(b=>b.BowlerAverage)
+            .AsNoTracking()
+            .ToListAsync());
         }
 
         // GET: Bowlers/Details/5
@@ -49,6 +56,7 @@ namespace core2Bowling.Controllers
         }
 
         // GET: Bowlers/Create
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             return View();
