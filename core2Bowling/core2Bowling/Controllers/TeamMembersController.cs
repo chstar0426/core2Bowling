@@ -80,15 +80,16 @@ namespace core2Bowling.Controllers
         public async Task<IActionResult> IndexGame(int? id, string sortOrder)
         {
 
-            bool notGuest = false;
-
-
             if (id == null)
             {
                 return NotFound();
 
             }
-            
+
+            var game = _context.Games.Where(g => g.ID == id).Include(s => s.SubGames).SingleOrDefault();
+            bool notGuest = game.bFine==true ? true : false;  //벌금표시시 게스트는 제외함
+
+
             var bowlingContext = new List<TeamMember>();
 
             if (notGuest)
@@ -129,8 +130,8 @@ namespace core2Bowling.Controllers
             }
 
             //var returnValue = bowlingContext.OrderBy(t => t.Team.SubGame.Round).GroupBy(t => t.BowlerID)
-                //.OrderByDescending(g => g.Average(a => a.Score) - (g.FirstOrDefault().Average));
-                //.OrderByDescending(g => g.Average(a => a.Score));
+            //.OrderByDescending(g => g.Average(a => a.Score) - (g.FirstOrDefault().Average));
+            //.OrderByDescending(g => g.Average(a => a.Score));
 
             // 위의 두 명령을 합쳐서 표시하니 GroupBy에 에러 발생하여 위와같이 분리함
             //var returnValue = _context.TeamMembers
@@ -154,13 +155,10 @@ namespace core2Bowling.Controllers
             //    .AsNoTracking();
 
 
+            ViewData["Game"] = game;
 
-            ViewData["Game"] = _context.Games.Where(g => g.ID == id).Include(s => s.SubGames).SingleOrDefault();
-            
             ViewData["bowlingContext"] = bowlingContext.OrderByDescending(t => t.Score).Take(10);
             
-           
-
             //return View(await bowlingContext.ToListAsync());
             return View(returnValue);
           
@@ -655,7 +653,8 @@ namespace core2Bowling.Controllers
         [Authorize(Policy = "AdminGroup")]
         public async Task<IActionResult> Edit(int? id)
         {
-           
+            ViewData["subGame"] = _context.SubGames.Include(s=>s.Game).Where(s => s.ID == id).SingleOrDefault();
+            
             if (id == null)
             {
                 return NotFound();
@@ -665,8 +664,8 @@ namespace core2Bowling.Controllers
                 .Include(t => t.Bowler)
                     .ThenInclude(b=>b.BowlerAverage)
                 .Include(t => t.Team)
-                    .ThenInclude(s => s.SubGame)
-                        .ThenInclude(g=>g.Game)
+                    //.ThenInclude(s => s.SubGame)
+                    //    .ThenInclude(g=>g.Game)
                 .Where(t=>t.Team.SubGameID==id)
                  .OrderBy(t => t.Team.TeamOrder)
                 .ThenBy(t => t.Sequence)
@@ -689,8 +688,10 @@ namespace core2Bowling.Controllers
         public async Task<IActionResult> Edit(int? Id, int[] inputScores)
         {
 
-            bool inHandi = false;
-            
+            var subGame = _context.SubGames.Include(s => s.Game).Where(s => s.ID == Id).SingleOrDefault();
+            bool inHandi = subGame.Game.bHandicap;
+
+
             if (Id == null) 
             { 
                 return NotFound(); 
@@ -700,12 +701,12 @@ namespace core2Bowling.Controllers
                 .Include(t => t.Bowler)
                     .ThenInclude(b=>b.BowlerAverage)
                .Include(t => t.Team)
-                    .ThenInclude(s=>s.SubGame)
                .Where(t => t.Team.SubGameID == Id)
                 .OrderBy(t => t.Team.TeamOrder)
                 .ThenBy(t => t.Sequence)
                .ToListAsync();
 
+            
             if (teamMembers ==null)
             {
                 return NotFound();
@@ -730,11 +731,10 @@ namespace core2Bowling.Controllers
 
                 }
 
-          
                 await _context.SaveChangesAsync();
 
-                var game = teamMembers.First().Team.SubGame;
-                return RedirectToAction(nameof(Index), new { Id = game.GameID, game= game.Round });
+                
+                return RedirectToAction(nameof(Index), new { Id = subGame.GameID, game= subGame.Round });
                
             }
             catch (DbUpdateException)

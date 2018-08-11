@@ -5,7 +5,7 @@
     var game = (Game)ViewData["Game"];
     int queryGame = Context.Request.Query["game"].ToString() == "" ? 1 : Convert.ToInt32(Context.Request.Query["game"]);
     int penalty = game.Penalty;  // 우승팀 차감점수
-    bool fine = false; //벌금표시
+    bool fine = game.bFine; //벌금표시
 
 }
 <h2>게임상세정보 &nbsp;&nbsp;<small><i class="glyphicon glyphicon glyphicon-hand-right"></i> 각 게임에 대한 상세 기록입니다</small></h2>
@@ -16,7 +16,9 @@
     </div>
     <div class="panel-body">
         <div class="text-danger  pull-left">@game.GameKind  @(string.IsNullOrEmpty(game.GameContent) ? "" : "(" + game.GameContent + ")") </div>
-        &nbsp;&nbsp; | &nbsp;&nbsp; @game.Playtime  &nbsp;&nbsp; | &nbsp;&nbsp; @game.Place
+        &nbsp;&nbsp; | &nbsp;&nbsp; @game.Playtime  (@game.Place)
+        &nbsp;&nbsp; | &nbsp;&nbsp;  @(game.bFine ? "벌금 있음" : "벌금 없음")
+        &nbsp;&nbsp; | &nbsp;&nbsp;  @(game.bHandicap ? "핸디 적용" : "핸디 미적용")
         <div class="pull-right">
             @if (!User.IsInRole("Member"))
             {
@@ -25,6 +27,12 @@
             }
             <a asp-action="IndexGame" asp-route-id="@ViewContext.RouteData.Values["Id"]">개인결과</a>
         </div>
+        @if (!string.IsNullOrEmpty(game.GameMemo))
+        {
+            <br />
+            <i class="glyphicon glyphicon glyphicon-arrow-right" style="padding-top:15px;"></i> <strong>@game.GameMemo</strong>
+        }
+        
     </div>
 </div>
 

@@ -62,7 +62,7 @@ namespace core2Bowling.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Playtime,Place,GameKind, Panelty, GameContent,Group")] Game game)
+        public async Task<IActionResult> Create([Bind("Playtime,Place,GameKind,GameContent,Penalty,Group,bFine, bHandicap, GameMemo")] Game game)
         {
             try
             {
@@ -90,13 +90,15 @@ namespace core2Bowling.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AutoPractice()
         {
-            
+
             var game = new Game
             {
-                GameKind = GameKind.연습게임,
-                Penalty=0,
+                GameKind = GameKind.개인기록,
+                Penalty = 0,
                 Group = "Family",
                 Place = "현대볼링장",
+                bFine = false,
+                bHandicap =false,
                 Playtime = DateTime.Now
 
             };
@@ -151,9 +153,11 @@ namespace core2Bowling.Controllers
             var game = new Game
             {
                 GameKind = GameKind.비정기전,
-               Penalty=0,
+                Penalty = 0,
                 Group = "Family",
                 Place = "현대볼링장",
+                bFine = false,
+                bHandicap=false,
                 Playtime = DateTime.Now
 
             };
@@ -210,16 +214,15 @@ namespace core2Bowling.Controllers
                 {
                     BowlerID = "fg001",
                     Score = 0,
-                    Average= _context.BowlerAverages.Find("fp001").Average,
+                    Average= _context.BowlerAverages.Find("fg001").Average,
                     Sequence = 0,
                     TeamID = teams[0].ID
-                    
                 },
                 new TeamMember
                 {
                     BowlerID = "fg002",
                     Score = 0,
-                   Average= _context.BowlerAverages.Find("fp002").Average,
+                    Average= _context.BowlerAverages.Find("fg002").Average,
                     Sequence = 0,
                     TeamID = teams[1].ID
 
@@ -228,7 +231,7 @@ namespace core2Bowling.Controllers
                 {
                     BowlerID = "fg003",
                     Score = 0,
-                    Average= _context.BowlerAverages.Find("fp003").Average,
+                    Average= _context.BowlerAverages.Find("fg003").Average,
                     Sequence = 0,
                     TeamID = teams[2].ID
 
@@ -237,11 +240,12 @@ namespace core2Bowling.Controllers
                 {
                     BowlerID = "fg004",
                     Score = 0,
-                   Average= _context.BowlerAverages.Find("fp004").Average,
+                   Average= _context.BowlerAverages.Find("fg004").Average,
                     Sequence = 0,
                     TeamID = teams[3].ID
 
                 }
+
 
             };
 
@@ -289,7 +293,8 @@ namespace core2Bowling.Controllers
             var game = await _context.Games.SingleOrDefaultAsync(m => m.ID == id);
 
             if (await TryUpdateModelAsync<Game>(game,"",
-                g=>g.Playtime, g=>g.Place, g=>g.GameKind, g=>g.Penalty, g=>g.GameContent))
+                g=>g.Playtime, g=>g.Place, g=>g.GameKind, g => g.GameContent, g=>g.Penalty, 
+                g=>g.bFine, g=>g.bHandicap, g=>g.GameMemo))
             {
 
                 try

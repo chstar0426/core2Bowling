@@ -9,7 +9,7 @@
 
     bool sortOrder = (Context.Request.Query["sortOrder"]=="preAvg"?true:false);
 
-    bool fine = false; //벌금표시
+    bool fine = game.bFine; //벌금표시
 
 }
 <h2>경기결과 &nbsp;&nbsp;<small><i class="glyphicon glyphicon glyphicon-hand-right"></i> 경기결과에 대한 상세 기록입니다</small></h2>
@@ -20,8 +20,17 @@
     </div>
     <div class="panel-body">
         <div class="text-danger  pull-left">@game.GameKind  @(string.IsNullOrEmpty(game.GameContent) ? "" : "(" + game.GameContent + ")")</div>
-        &nbsp;&nbsp; | &nbsp;&nbsp;  @game.Playtime  &nbsp;&nbsp; | &nbsp;&nbsp; @game.Place
-        <div class="pull-right"><a asp-action="Index" asp-route-id="@ViewContext.RouteData.Values["Id"]">경기결과</a></div>
+        &nbsp;&nbsp; | &nbsp;&nbsp;  @game.Playtime (@game.Place)
+        &nbsp;&nbsp; | &nbsp;&nbsp;  @(game.bFine ? "벌금 있음" : "벌금 없음")
+        &nbsp;&nbsp; | &nbsp;&nbsp;  @(game.bHandicap ? "핸디 적용" : "핸디 미적용")
+        <div class="pull-right">
+            <a asp-action="Index" asp-route-id="@ViewContext.RouteData.Values["Id"]">경기결과</a>
+        </div>
+        @if (!string.IsNullOrEmpty(game.GameMemo))
+        {
+                <br />
+                <i class="glyphicon glyphicon glyphicon-arrow-right" style="padding-top:15px;"></i> <strong>@game.GameMemo</strong>
+        }
     </div>
 </div>
 
@@ -105,6 +114,14 @@
 
                 int imsiAvg = avg;
 
+                string strikeAvg = string.Empty;
+
+
+                if (avg == 0)
+                {
+                    strikeAvg = "style=text-decoration:line-through";
+                    //strikeText = "text-danger";
+                }
 
                 //평균 200이상은 200, 150이하는 150으로 계산
                 if (handi == 0 && avg > 199)
@@ -121,7 +138,7 @@
                 }
 
 
-                @:<tr>
+                @:<tr @strikeAvg>
                 <td>@orderNum</td>
 
                 foreach (var bw in item)

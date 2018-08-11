@@ -45,7 +45,7 @@
 
 
 <table class="table">
-    <thead>
+    <thead class="text-center">
         <tr>
             <th>
                 @Html.DisplayNameFor(model => model.Playtime)
@@ -57,18 +57,27 @@
                 @Html.DisplayNameFor(model => model.GameKind)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Penalty)
+                @Html.DisplayNameFor(model => model.GameContent)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.GameContent)
+                @Html.DisplayNameFor(model => model.Penalty)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Group)
             </th>
+            <th>
+                @Html.DisplayNameFor(model => model.bFine)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.bHandicap)
+            </th>
+            @*<th>
+                @Html.DisplayNameFor(model => model.GameMemo)
+            </th>*@
             <th></th>
         </tr>
     </thead>
-    <tbody>
+    <tbody class="text-center">
 @foreach (var item in Model) {
         <tr>
             <td>
@@ -81,25 +90,34 @@
                 @Html.DisplayFor(modelItem => item.GameKind)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Penalty)
+                @Html.DisplayFor(modelItem => item.GameContent)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.GameContent)
+                @Html.DisplayFor(modelItem => item.Penalty)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Group)
             </td>
             <td>
+                @Html.DisplayFor(modelItem => item.bFine)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.bHandicap)
+            </td>
+            @*<td>
+                @Html.DisplayFor(modelItem => item.GameMemo)
+            </td>*@
+            <td>
                 <a asp-controller="TeamMembers" asp-action="Index" asp-route-id="@item.ID" class="text-info">경기상세</a>
                 @if (!User.IsInRole("Member"))
                 {
-                    @:| 
+                    @:|
                     <a asp-action="Edit" asp-route-id="@item.ID" class="text-warning">경기수정</a> @:|
                     <a asp-action="Delete" asp-route-id="@item.ID" class="text-danger">경기삭제</a>
 
                 }
 
-            @*<a asp-action="Details" asp-route-id="@item.ID">Details</a> |
+        @*<a asp-action="Details" asp-route-id="@item.ID">Details</a> |
     <a asp-controller="TeamMembers" asp-action="IndexVertical" asp-route-id="@item.ID">경기설정2</a>
     <a asp-controller="TeamMembers" asp-action="IndexGame" asp-route-id="@item.ID">경기설정3</a>*@
             </td>

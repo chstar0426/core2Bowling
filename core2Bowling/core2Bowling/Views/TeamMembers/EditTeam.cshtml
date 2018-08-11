@@ -15,7 +15,10 @@
     </div>
     <div class="panel-body">
         <div class="text-danger  pull-left">@game.GameKind  @(string.IsNullOrEmpty(game.GameContent) ? "" : "(" + game.GameContent + ")")</div>
-        &nbsp;&nbsp; | &nbsp;&nbsp;  @Model.First().Team.SubGame.Round 번째 게임  &nbsp;&nbsp; | &nbsp;&nbsp; @game.Playtime  &nbsp;&nbsp; | &nbsp;&nbsp; @game.Place <br />
+        &nbsp;&nbsp; | &nbsp;&nbsp;  @Model.First().Team.SubGame.Round 번째 게임
+        &nbsp;&nbsp; | &nbsp;&nbsp;  @game.Playtime (@game.Place)
+        &nbsp;&nbsp; | &nbsp;&nbsp;  @(game.bFine ? "벌금 있음" : "벌금 없음")
+        &nbsp;&nbsp; | &nbsp;&nbsp;  @(game.bHandicap ? "핸디 적용" : "핸디 미적용")
     </div>
 </div>
 
