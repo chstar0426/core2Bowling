@@ -1,0 +1,164 @@
+﻿@model IEnumerable<core2Bowling.Models.YearAverage>
+
+@{
+    ViewData["Title"] = "Index";
+    string[] gGroup = { "RedPin", "Family" };
+    string qGroup = Context.Request.Query["gameGroup"];
+    qGroup = string.IsNullOrEmpty(qGroup) ? "RedPin" : qGroup;
+
+
+}
+
+<h2>년간 에버 &nbsp;&nbsp;<small><i class="glyphicon glyphicon glyphicon-hand-right"></i> 연도별 에버 현황입니다</small></h2>
+<hr />
+
+
+@if (User.IsInRole("Admin"))
+{
+
+    <p>
+        <a asp-action="Create">Create New</a>
+    </p>
+    
+
+    <div class="btn-group pull-right" style="margin-left:50px" data-toggle="buttons">
+
+        @foreach (var item in gGroup)
+        {
+            string SelectedGroup = string.Empty;
+
+            if (item == qGroup)
+            {
+                SelectedGroup = "active";
+
+            }
+        <label class="btn btn-default blue @SelectedGroup">
+            <input type="radio" name="opt" class="toggle" value="@item" />@item
+        </label>
+
+        }
+
+    </div>
+}
+
+<div class="clearfix"></div>
+
+
+<div class="tabbable-panel">
+    <div class="tabbable-line">
+        <ul class="nav nav-tabs ">
+            @{
+                string selectedActive = "active";
+                int sequence = 0;
+            }
+
+            @foreach (var item in Model.Select(y => y.Year).Distinct())
+            {
+                if (sequence > 0)//제일처음에는 실행하지 않음
+                {
+                    selectedActive = "";
+                }
+
+
+                <li class="@selectedActive">
+                    <a href="#tab_year_@item" data-toggle="tab">
+                        @item 년도 경기
+                    </a>
+                </li>
+
+                sequence++;
+            }
+        </ul>
+        <div class="tab-content">
+            @{
+                var year = string.Empty;
+                sequence = 0;
+                selectedActive = "active";
+            }
+
+            @foreach (var item in Model)
+            {
+                if (item.Year != year)
+                {
+                    if (sequence > 0)//제일처음에는 실행하지 않음
+                    {
+                        @:</tbody></table></div>
+                        selectedActive = "";
+                    }
+
+                year = item.Year;
+                sequence = 1;
+
+                @:<div class="tab-pane  @selectedActive" id="tab_year_@item.Year">
+                    @:<table class="type02">
+                        <thead>
+                            <tr>
+                                <th>
+                                    연도
+                                </th>
+                                <th>
+                                    선수
+                                </th>
+                                <th>
+                                    에버리지
+                                </th>
+                                <th>
+                                    비고
+                                </th>
+
+                                <th></th>
+                            </tr>
+                        </thead>
+                        @:<tbody>
+                        }
+                        <tr>
+                            <td>@item.Year @sequence</td>
+                            <td>@item.Bowler.Name</td>
+                            <td>@item.Average</td>
+                            <td>@item.Bigo</td>
+                            <td class="td-last">
+                                <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
+                                <a asp-action="Details" asp-route-id="@item.ID">Details</a> |
+                                <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
+                            </td>
+                        </tr>
+                        sequence++;
+
+                    }
+
+        </tbody>
+    </table>
+</div>
+
+</div>
+</div>
+</div>
+
+
+
+
+
+
+@section Styles {
+    <link href="~/css/tabCss.css" rel="stylesheet">
+}
+
+
+@section Scripts {
+
+    <script>
+
+        $(function () {
+
+            $('input[type=radio]').change(function () {
+
+                //alert($(this).val());
+                document.location.href = '/YearAverages/index?gameGroup=' + $(this).val();
+
+            });
+
+        });
+
+    </script>
+}
+

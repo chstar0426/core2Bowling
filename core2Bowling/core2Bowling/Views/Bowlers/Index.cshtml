@@ -2,6 +2,12 @@
 
 @{
     ViewData["Title"] = "Index";
+    string[] gGroup = { "RedPin", "Family" };
+    string qGroup = Context.Request.Query["gameGroup"];
+    qGroup = string.IsNullOrEmpty(qGroup) ? "RedPin" : qGroup;
+
+    string styleInactive = string.Empty;
+
 }
 
 <h2>회원목록 &nbsp;&nbsp;<small><i class="glyphicon glyphicon glyphicon-hand-right"></i> 회원 현황입니다</small></h2>
@@ -10,69 +16,152 @@
 <div>
     @if (User.IsInRole("Admin"))
     {
+        <div class="btn-group pull-left" style="margin-left:10px" data-toggle="buttons">
+
+            @foreach (var item in gGroup)
+            {
+                string SelectedGroup = string.Empty;
+
+                if (item == qGroup)
+                {
+                    SelectedGroup = "active";
+
+                }
+                <label class="btn btn-default blue @SelectedGroup">
+                    <input type="radio" name="opt" class="toggle" value="@item" />@item
+                </label>
+
+            }
+
+        </div>
+
         <a asp-action="Create" class="pull-right btn btn-default ">신규회원</a>
-    }else{
+    }
+    else
+    {
         <p class="text-right text-primary">회원추가는 관리자에게 문의하세요</p>
     }
-    
+
 </div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>
-                    @Html.DisplayNameFor(model => model.BowlerID)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.Name)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.Group)
-                </th>
+<div class="clearfix">
+    @*<div style="border-bottom: 4px solid #e0dcdc; margin-top:50px;">
+        </div>*@
+</div>
 
-                <th>
-                    @Html.DisplayNameFor(model => model.BowlerAverage.Average)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.BowlerAverage.Handicap)
-                </th>
+<table class="type02">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.BowlerID)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Group)
+            </th>
 
-                <th>
-                    @Html.DisplayNameFor(model => model.InActivity)
-                </th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
+            <th>
+                @Html.DisplayNameFor(model => model.BowlerAverage.Average)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.BowlerAverage.Handicap)
+            </th>
+
+            <th>
+                @Html.DisplayNameFor(model => model.InActivity)
+            </th>
+
+            <th>
+                @Html.DisplayNameFor(model => model.RegisterDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LeaveDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.BowlerAverage.Bigo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Bigo)
+            </th>
+
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            if (item.InActivity == true)
             {
-                <tr>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.BowlerID)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Name)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Group)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.BowlerAverage.Average)
-
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.BowlerAverage.Handicap)
-
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.InActivity)
-                    </td>
-                    <td>
-                        <a asp-action="Edit" asp-route-id="@item.BowlerID">Edit</a> |
-                        <a asp-action="Details" asp-route-id="@item.BowlerID">Details</a> |
-                        <a asp-action="Delete" asp-route-id="@item.BowlerID">Delete</a>
-                    </td>
-                </tr>
+                styleInactive = "background-color:#c00; color:#fff";
             }
-        </tbody>
-    </table>
+        <tr style="@styleInactive">
+            <td>
+                @Html.DisplayFor(modelItem => item.BowlerID)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Group)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.BowlerAverage.Average)
+
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.BowlerAverage.Handicap)
+
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.InActivity)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.RegisterDate)
+            </td>
+            <td>
+                @item.LeaveDate?.ToString("yyyy-MM-dd")
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Bigo)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.BowlerAverage.Bigo)
+            </td>
+            <td class="td-last">
+                <a asp-action="Edit" asp-route-id="@item.BowlerID">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.BowlerID">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.BowlerID">Delete</a>
+            </td>
+        </tr>
+
+            if (styleInactive!=string.Empty)
+            {
+                styleInactive = string.Empty;
+
+            }
+        }
+    </tbody>
+</table>
+
+
+@section Scripts {
+
+    <script>
+
+        $(function () {
+
+            $('input[type=radio]').change(function () {
+
+                //alert($(this).val());
+                document.location.href = '/Bowlers/index?gameGroup=' + $(this).val();
+
+            });
+            
+
+        });
+
+    </script>
+}
+

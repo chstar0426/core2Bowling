@@ -20,48 +20,45 @@ namespace core2Bowling.Models
             var bowlers = new Bowler[]
             {
 
-               new Bowler{ BowlerID="fg001", Name="최국헌",  Group="Family"},
-               new Bowler{ BowlerID="fg002", Name="소정란",  Group="Family"},
-               new Bowler{ BowlerID="fg003", Name="최창헌",  Group="Family"},
-               new Bowler{ BowlerID="fg004", Name="최승필",  Group="Family"},
-               
-               new Bowler{ BowlerID="rp001", Name="김정일", Group="RedPin"},
-               new Bowler{ BowlerID="rp002", Name="김진구", Group="RedPin"},
-               new Bowler{ BowlerID="rp003", Name="권호석", Group="RedPin"},
-               new Bowler{ BowlerID="rp004", Name="배언욱", Group="RedPin"},
-               new Bowler{ BowlerID="rp005", Name="박미정", Group="RedPin"},
-               new Bowler{ BowlerID="rp006", Name="허진범", Group="RedPin"},
-               new Bowler{ BowlerID="rp007", Name="김은희", Group="RedPin"},
-               new Bowler{ BowlerID="rp008", Name="강종현", Group="RedPin"},
-               new Bowler{ BowlerID="rp009", Name="곽신규", Group="RedPin"},
-               new Bowler{ BowlerID="rp010", Name="신창용", Group="RedPin"},
-               new Bowler{ BowlerID="rp011", Name="김진영", Group="RedPin"},
-               new Bowler{ BowlerID="rp012", Name="권미경", Group="RedPin"},
-               new Bowler{ BowlerID="rp013", Name="김윤섭", Group="RedPin"},
-               new Bowler{ BowlerID="rp014", Name="신인자", Group="RedPin"},
-               new Bowler{ BowlerID="rp015", Name="서보윤", Group="RedPin"},
-               new Bowler{ BowlerID="rp016", Name="노애경", Group="RedPin"},
-               new Bowler{ BowlerID="rp017", Name="오정수", Group="RedPin"},
-               new Bowler{ BowlerID="rp018", Name="최국헌", Group="RedPin"},
-               new Bowler{ BowlerID="rp019", Name="이나경", Group="RedPin"},
-               new Bowler{ BowlerID="rp020", Name="이상헌", Group="RedPin"},
+               new Bowler{ BowlerID="fg001", Name="최국헌",  Group="Family", RegisterDate=DateTime.Parse("2018-01-01")},
+               new Bowler{ BowlerID="fg002", Name="소정란",  Group="Family", RegisterDate=DateTime.Parse("2018-01-01")},
+               new Bowler{ BowlerID="fg003", Name="최창헌",  Group="Family", RegisterDate=DateTime.Parse("2018-01-01")},
+               new Bowler{ BowlerID="fg004", Name="최승필",  Group="Family", RegisterDate=DateTime.Parse("2018-01-01")},
 
+               new Bowler{ BowlerID="rp001", Name="김정일", Group="RedPin", RegisterDate=DateTime.Parse("2018-01-01")},
+               new Bowler{ BowlerID="rp002", Name="김진구", Group="RedPin", RegisterDate=DateTime.Parse("2018-01-01")},
+               new Bowler{ BowlerID="rp003", Name="권호석", Group="RedPin", RegisterDate=DateTime.Parse("2018-01-01")},
+               new Bowler{ BowlerID="rp004", Name="배언욱", Group="RedPin", RegisterDate=DateTime.Parse("2018-01-01")},
+               new Bowler{ BowlerID="rp005", Name="박미정", Group="RedPin", RegisterDate=DateTime.Parse("2018-01-01")},
+               new Bowler{ BowlerID="rp006", Name="허진범", Group="RedPin", RegisterDate=DateTime.Parse("2018-01-01")},
+               new Bowler{ BowlerID="rp007", Name="김은희", Group="RedPin", RegisterDate=DateTime.Parse("2018-01-01")},
+               new Bowler{ BowlerID="rp008", Name="강종현", Group="RedPin", RegisterDate=DateTime.Parse("2018-01-01")},
+               new Bowler{ BowlerID="rp009", Name="곽신규", Group="RedPin", RegisterDate=DateTime.Parse("2018-01-01")},
+               new Bowler{ BowlerID="rp010", Name="신창용", Group="RedPin", RegisterDate=DateTime.Parse("2018-01-01")},
+               new Bowler{ BowlerID="rp011", Name="김진영", Group="RedPin", RegisterDate=DateTime.Parse("2018-01-01")},
+               new Bowler{ BowlerID="rp012", Name="권미경", Group="RedPin", RegisterDate=DateTime.Parse("2018-01-01")},
+               new Bowler{ BowlerID="rp013", Name="김윤섭", Group="RedPin", RegisterDate=DateTime.Parse("2018-01-01")},
+               new Bowler{ BowlerID="rp014", Name="신인자", Group="RedPin", RegisterDate=DateTime.Parse("2018-01-01")},
+               new Bowler{ BowlerID="rp015", Name="서보윤", Group="RedPin", RegisterDate=DateTime.Parse("2018-01-01")},
+               new Bowler{ BowlerID="rp016", Name="노애경", Group="RedPin", RegisterDate=DateTime.Parse("2018-01-01")},
+               new Bowler{ BowlerID="rp017", Name="오정수", Group="RedPin", RegisterDate=DateTime.Parse("2018-01-01")},
+               new Bowler{ BowlerID="rp018", Name="최국헌", Group="RedPin", RegisterDate=DateTime.Parse("2018-01-01")},
+               new Bowler{ BowlerID="rp019", Name="이나경", Group="RedPin", RegisterDate=DateTime.Parse("2018-01-01")},
+               new Bowler{ BowlerID="rp020", Name="이상헌", Group="RedPin", RegisterDate=DateTime.Parse("2018-01-01")},
+               new Bowler{ BowlerID="rp021", Name="윤정남", Group="RedPin", RegisterDate=DateTime.Parse("2018-01-01")},
+               new Bowler{ BowlerID="rp022", Name="최우정", Group="RedPin", RegisterDate=DateTime.Parse("2018-01-01")},
 
-               new Bowler{ BowlerID="gu001", Name="게스트1", Group="zGroup"},
-               new Bowler{ BowlerID="gu002", Name="게스트2", Group="zGroup"},
-               new Bowler{ BowlerID="gu003", Name="게스트3", Group="zGroup"},
-               new Bowler{ BowlerID="gu004", Name="게스트4", Group="zGroup"},
-               new Bowler{ BowlerID="gu005", Name="게스트5", Group="zGroup"},
-               
+               new Bowler{ BowlerID="gu001", Name="게스트1", Group="zGroup", RegisterDate=DateTime.Parse("2018-01-01")},
+               new Bowler{ BowlerID="gu002", Name="게스트2", Group="zGroup", RegisterDate=DateTime.Parse("2018-01-01")},
+               new Bowler{ BowlerID="gu003", Name="게스트3", Group="zGroup", RegisterDate=DateTime.Parse("2018-01-01")},
+               new Bowler{ BowlerID="gu004", Name="게스트4", Group="zGroup", RegisterDate=DateTime.Parse("2018-01-01")},
+               new Bowler{ BowlerID="gu005", Name="게스트5", Group="zGroup", RegisterDate=DateTime.Parse("2018-01-01")},
 
-               new Bowler{ BowlerID="hd001", Name="핸디1", Group="zGroup"},
-               new Bowler{ BowlerID="hd002", Name="핸디2", Group="zGroup"},
-               new Bowler{ BowlerID="hd003", Name="핸디3", Group="zGroup"},
-               new Bowler{ BowlerID="hd004", Name="핸디4", Group="zGroup"},
-               new Bowler{ BowlerID="hd005", Name="핸디5", Group="zGroup"}
-
-
-
+               new Bowler{ BowlerID="hd001", Name="핸디1", Group="zGroup", RegisterDate=DateTime.Parse("2018-01-01")},
+               new Bowler{ BowlerID="hd002", Name="핸디2", Group="zGroup", RegisterDate=DateTime.Parse("2018-01-01")},
+               new Bowler{ BowlerID="hd003", Name="핸디3", Group="zGroup", RegisterDate=DateTime.Parse("2018-01-01")},
+               new Bowler{ BowlerID="hd004", Name="핸디4", Group="zGroup", RegisterDate=DateTime.Parse("2018-01-01")},
+               new Bowler{ BowlerID="hd005", Name="핸디5", Group="zGroup", RegisterDate=DateTime.Parse("2018-01-01")}
 
 
             };
@@ -79,7 +76,7 @@ namespace core2Bowling.Models
                 new BowlerAverage{BowlerID="fg002", Average=165, Handicap=15},
                 new BowlerAverage{BowlerID="fg003", Average=165, Handicap=0},
                 new BowlerAverage{BowlerID="fg004", Average=130, Handicap=30},
-                
+
                 new BowlerAverage{BowlerID="rp001", Average=202, Handicap=0},
                 new BowlerAverage{BowlerID="rp002", Average=194, Handicap=0},
                 new BowlerAverage{BowlerID="rp003", Average=187, Handicap=0},
@@ -100,6 +97,8 @@ namespace core2Bowling.Models
                 new BowlerAverage{BowlerID="rp018", Average=156, Handicap=0},
                 new BowlerAverage{BowlerID="rp019", Average=155, Handicap=15},
                 new BowlerAverage{BowlerID="rp020", Average=131, Handicap=0},
+                new BowlerAverage{BowlerID="rp021", Average=180, Handicap=0},
+                new BowlerAverage{BowlerID="rp022", Average=180, Handicap=0},
 
 
                 new BowlerAverage{BowlerID="gu001", Average=0, Handicap=0},
@@ -113,7 +112,7 @@ namespace core2Bowling.Models
                 new BowlerAverage{BowlerID="hd003", Average=0, Handicap=0},
                 new BowlerAverage{BowlerID="hd004", Average=0, Handicap=0},
                 new BowlerAverage{BowlerID="hd005", Average=0, Handicap=0}
-                
+
             };
 
             foreach (var a in bowlerAverage)
@@ -123,11 +122,51 @@ namespace core2Bowling.Models
             context.SaveChanges();
 
 
-           
+            var yearAverages = new YearAverage[]
+            {
+
+               new YearAverage{ BowlerID="fg001", Year="2017", Bigo="", Average=165},
+               new YearAverage{ BowlerID="fg002", Year="2017", Bigo="", Average=165},
+               new YearAverage{ BowlerID="fg003", Year="2017", Bigo="", Average=165},
+               new YearAverage{ BowlerID="fg004", Year="2017", Bigo="", Average=120},
+
+               new YearAverage{ BowlerID="rp001", Year="2017", Bigo="", Average=189},
+               new YearAverage{ BowlerID="rp002", Year="2017", Bigo="", Average=196},
+               new YearAverage{ BowlerID="rp003", Year="2017", Bigo="", Average=189},
+               new YearAverage{ BowlerID="rp004", Year="2017", Bigo="", Average=180},
+               new YearAverage{ BowlerID="rp005", Year="2017", Bigo="", Average=171},
+               new YearAverage{ BowlerID="rp006", Year="2017", Bigo="", Average=181},
+               new YearAverage{ BowlerID="rp007", Year="2017", Bigo="", Average=186},
+               new YearAverage{ BowlerID="rp008", Year="2017", Bigo="", Average=191},
+               new YearAverage{ BowlerID="rp009", Year="2017", Bigo="", Average=184},
+               new YearAverage{ BowlerID="rp010", Year="2017", Bigo="", Average=191},
+               new YearAverage{ BowlerID="rp011", Year="2017", Bigo="", Average=170},
+               new YearAverage{ BowlerID="rp012", Year="2017", Bigo="", Average=172},
+               new YearAverage{ BowlerID="rp013", Year="2017", Bigo="", Average=168},
+               new YearAverage{ BowlerID="rp014", Year="2017", Bigo="", Average=167},
+               new YearAverage{ BowlerID="rp015", Year="2017", Bigo="", Average=170},
+               new YearAverage{ BowlerID="rp016", Year="2017", Bigo="", Average=167},
+               new YearAverage{ BowlerID="rp017", Year="2017", Bigo="", Average=168},
+               new YearAverage{ BowlerID="rp018", Year="2017", Bigo="", Average=154},
+               new YearAverage{ BowlerID="rp019", Year="2017", Bigo="", Average=150},
+               new YearAverage{ BowlerID="rp020", Year="2017", Bigo="", Average=148},
+               new YearAverage{ BowlerID="rp021", Year="2017", Bigo="", Average=180},
+               new YearAverage{ BowlerID="rp022", Year="2017", Bigo="", Average=180},
+
+            };
+
+            foreach (YearAverage y in yearAverages)
+            {
+                context.YearAversges.Add(y);
+            }
+            context.SaveChanges();
+
+
+
             var games = new Game[]
             {
-                new Game{ Playtime=DateTime.Parse("2018-06-13 20:00"), GameKind=GameKind.정기전, Penalty=100, Group="RedPin", Place="현대볼링장", GameContent="1/4",
-                            bFine=false, bHandicap=false}
+                new Game{ Playtime=DateTime.Parse("2018-06-13 20:00"), GameKind=GameKind.정기전, Penalty=100, Group="RedPin", Place="현대볼링장", GameContent="6-1",
+                            bFine=true, bHandicap=true}
             };
 
             foreach (var item in games)
@@ -143,7 +182,7 @@ namespace core2Bowling.Models
                 new SubGame{ Round=2, GameID = games.Single( g => g.Playtime == DateTime.Parse("2018-06-13 20:00")).ID},
                 new SubGame{ Round=3, GameID = games.Single( g => g.Playtime == DateTime.Parse("2018-06-13 20:00")).ID},
 
-                
+
 
             };
 
@@ -242,7 +281,7 @@ namespace core2Bowling.Models
                  new TeamMember{Average=0,   BowlerID="gu002", Score=166,  Sequence=2, TeamID=teams.Single(t=>t.TeamOrder==3 && t.SubGame.Round == 3 && t.SubGame.Game.Playtime==DateTime.Parse("2018-06-13 20:00")).ID },
                  new TeamMember{Average=173, BowlerID="rp011", Score=194,  Sequence=3, TeamID=teams.Single(t=>t.TeamOrder==3 && t.SubGame.Round == 3 && t.SubGame.Game.Playtime==DateTime.Parse("2018-06-13 20:00")).ID },
                  new TeamMember{Average=202, BowlerID="rp001", Score=224,  Sequence=4, TeamID=teams.Single(t=>t.TeamOrder==3 && t.SubGame.Round == 3 && t.SubGame.Game.Playtime==DateTime.Parse("2018-06-13 20:00")).ID }
-               
+
 
            };
 

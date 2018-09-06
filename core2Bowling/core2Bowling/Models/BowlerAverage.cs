@@ -19,6 +19,10 @@ namespace core2Bowling.Models
         [Range(0,50)]
         public int Handicap { get; set; }
 
+        [Display(Name = "비고")]
+        [StringLength(50)]
+        public string Bigo { get; set; }
+
         public Bowler Bowler { get; set; }
         
       

@@ -67,7 +67,7 @@ namespace core2Bowling.Controllers
 
                     if (string.IsNullOrEmpty(returnUrl))
                     {
-                        return LocalRedirect("/Home/Index");
+                        return LocalRedirect("/Games/Index");
 
                     }
 
@@ -94,7 +94,7 @@ namespace core2Bowling.Controllers
         public async Task<IActionResult> UserLogout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return Redirect("/Home/Index");
+            return Redirect("/Games/Index");
         }
 
 

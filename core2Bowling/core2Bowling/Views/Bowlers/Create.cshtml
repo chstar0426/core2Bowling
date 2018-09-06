@@ -26,6 +26,73 @@
     <a asp-action="Index">Back to List</a>
 </div>
 
+
+
+@section Styles{
+
+    <link href="~/lib/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet" />
+}
+
+
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script src="~/lib/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
+    <script src="~/lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.ko.js"></script>
+
+    <script>
+
+        $('.form_datetime').datetimepicker({
+            language: 'ko',
+            weekStart: 0,
+            todayBtn: true,
+            autoclose: true,
+            todayHighlight: true,
+            startView: 2,
+            forceParse: true,
+            format: "yyyy-mm-dd",
+
+            minView: 2
+
+
+        });
+
+        $(function () {
+
+            var imsidate = $('#LeaveDate').val();
+
+            if (imsidate == "") {
+                var now = new Date();
+
+                var mon = (now.getMonth() + 1) > 9 ? '' + (now.getMonth() + 1) : '0' + (now.getMonth() + 1);
+                var day = now.getDate() > 9 ? '' + now.getDate() : '0' + now.getDate();
+
+                imsidate = now.getFullYear() + '-' + mon + '-' + day;
+
+                $('#LeaveDate').prop('disabled', true);
+            }
+
+            $('#InActivity').change(function () {
+
+                var leaveDate = $('#LeaveDate');
+
+
+                if (this.checked) {
+
+                    leaveDate.val(imsidate);
+                    leaveDate.prop('disabled', false);
+
+                } else {
+
+                    leaveDate.prop('disabled', true);
+                    imsidate = leaveDate.val();
+
+                    leaveDate.val("");
+
+                }
+
+            });
+        });
+
+    </script>
 }

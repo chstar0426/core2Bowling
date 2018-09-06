@@ -195,7 +195,7 @@ namespace core2Bowling.Controllers
 
             var bowlers = await _context.Bowlers
                 .Include(b => b.BowlerAverage)
-                .Where(b=>b.Group==group || b.Group=="zGroup")
+                .Where(b=>b.Group==group && b.InActivity == false|| b.Group=="zGroup")
                 .OrderBy(b => b.Group)
                 .ThenBy(b=>b.Name)
                 .AsNoTracking().ToListAsync();

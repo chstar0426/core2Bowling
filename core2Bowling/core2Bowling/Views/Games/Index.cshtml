@@ -2,11 +2,16 @@
 
 @{
     ViewData["Title"] = "Index";
+    string[] gGroup = { "RedPin", "Family"};
+    string qGroup = Context.Request.Query["gameGroup"];
+        qGroup = string.IsNullOrEmpty(qGroup) ? "RedPin" : qGroup;
+
 
 }
 
 <h2>게임목록 &nbsp;&nbsp;<small><i class="glyphicon glyphicon glyphicon-hand-right"></i> 경기 현황입니다</small></h2>
 <hr />
+
 
 
 <div style="margin-top:15px;">
@@ -15,9 +20,28 @@
     {
         <a asp-action="Create" class="pull-left btn btn-default">Create New</a>
     }
-
+   
     @if (User.IsInRole("Admin"))
     {
+
+        <div class="btn-group pull-left" style="margin-left:50px" data-toggle="buttons">
+
+            @foreach (var item in gGroup)
+            {
+                string SelectedGroup = string.Empty;
+
+                if (item == qGroup)
+                {
+                    SelectedGroup = "active";
+
+                }
+                <label class="btn btn-default blue @SelectedGroup">
+                    <input type="radio" name="opt" class="toggle" value="@item" />@item
+                </label>
+
+            }
+
+        </div>
 
         <div>
             <form asp-action="AutoPractice" class="pull-right">
@@ -39,13 +63,13 @@
 </div>
 
 <div class="clearfix">
-    <div style="border-bottom: 2px solid #e0dcdc; margin-top:50px;">
-     </div>
+    @*<div style="border-bottom: 4px solid #e0dcdc; margin-top:50px;">
+    </div>*@
 </div>
 
 
-<table class="table">
-    <thead class="text-center">
+<table class="type02">
+    <thead>
         <tr>
             <th>
                 @Html.DisplayNameFor(model => model.Playtime)
@@ -72,56 +96,75 @@
                 @Html.DisplayNameFor(model => model.bHandicap)
             </th>
             @*<th>
-                @Html.DisplayNameFor(model => model.GameMemo)
-            </th>*@
+                    @Html.DisplayNameFor(model => model.GameMemo)
+                </th>*@
             <th></th>
         </tr>
     </thead>
-    <tbody class="text-center">
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Playtime)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Place)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.GameKind)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.GameContent)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Penalty)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Group)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.bFine)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.bHandicap)
-            </td>
-            @*<td>
-                @Html.DisplayFor(modelItem => item.GameMemo)
-            </td>*@
-            <td>
-                <a asp-controller="TeamMembers" asp-action="Index" asp-route-id="@item.ID" class="text-info">경기상세</a>
-                @if (!User.IsInRole("Member"))
-                {
-                    @:|
-                    <a asp-action="Edit" asp-route-id="@item.ID" class="text-warning">경기수정</a> @:|
-                    <a asp-action="Delete" asp-route-id="@item.ID" class="text-danger">경기삭제</a>
+    <tbody>
+        @foreach (var item in Model)
+        {
+<tr>
+    <td>
+        @Html.DisplayFor(modelItem => item.Playtime)
+    </td>
+    <td>
+        @Html.DisplayFor(modelItem => item.Place)
+    </td>
+    <td>
+        @Html.DisplayFor(modelItem => item.GameKind)
+    </td>
+    <td>
+        @Html.DisplayFor(modelItem => item.GameContent)
+    </td>
+    <td>
+        @Html.DisplayFor(modelItem => item.Penalty)
+    </td>
+    <td>
+        @Html.DisplayFor(modelItem => item.Group)
+    </td>
+    <td>
+        @Html.DisplayFor(modelItem => item.bFine)
+    </td>
+    <td>
+        @Html.DisplayFor(modelItem => item.bHandicap)
+    </td>
+    @*<td>
+            @Html.DisplayFor(modelItem => item.GameMemo)
+        </td>*@
+    <td class="td-last">
+        <a asp-controller="TeamMembers" asp-action="Index" asp-route-id="@item.ID" class="text-info">경기상세</a>
+        @if (!User.IsInRole("Member"))
+        {
+            @:|
+            <a asp-action="Edit" asp-route-id="@item.ID" class="text-warning">경기수정</a> @:|
+            <a asp-action="Delete" asp-route-id="@item.ID" class="text-danger">경기삭제</a>
 
-                }
+        }
 
         @*<a asp-action="Details" asp-route-id="@item.ID">Details</a> |
-    <a asp-controller="TeamMembers" asp-action="IndexVertical" asp-route-id="@item.ID">경기설정2</a>
-    <a asp-controller="TeamMembers" asp-action="IndexGame" asp-route-id="@item.ID">경기설정3</a>*@
-            </td>
-        </tr>
+            <a asp-controller="TeamMembers" asp-action="IndexVertical" asp-route-id="@item.ID">경기설정2</a>
+            <a asp-controller="TeamMembers" asp-action="IndexGame" asp-route-id="@item.ID">경기설정3</a>*@
+    </td>
+</tr>
 }
     </tbody>
 </table>
+
+@section Scripts {
+
+    <script>
+
+        $(function () {
+
+            $('input[type=radio]').change(function () {
+                
+                //alert($(this).val());
+                document.location.href = '/games/index?gameGroup=' + $(this).val();
+                
+            });
+           
+        });
+
+    </script>
+    }

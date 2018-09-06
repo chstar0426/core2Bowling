@@ -22,14 +22,32 @@ namespace core2Bowling.Controllers
         }
 
         // GET: Bowlers
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string gameGroup)
         {
           
             var group = User.FindFirst("UserGroup").Value;
-            group = group == "All" ? "" : group;
 
-            return View(await _context.Bowlers.Where(b=>b.Group.Contains(group))
+            if (string.IsNullOrEmpty(gameGroup))
+            {
+                if (group == "All")
+                {
+                    gameGroup = "RedPin";
+                }
+                else
+                {
+                    gameGroup = group;
+                }
+
+            }
+
+            if (group != "All" && group != gameGroup)
+            {
+                return NotFound();
+            }
+
+            return View(await _context.Bowlers.Where(b=>b.Group.Contains(gameGroup))
             .Include(b=>b.BowlerAverage)
+            .OrderBy(b=>b.InActivity).ThenBy(b=>b.BowlerID)
             .AsNoTracking()
             .ToListAsync());
         }
@@ -67,7 +85,7 @@ namespace core2Bowling.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("BowlerID,Name,Group,InActivity, BowlerAverage")] Bowler bowler)
+        public async Task<IActionResult> Create([Bind("BowlerID,Name,Group,InActivity, BowlerAverage, RegisterDate, LeaveDate, Bigo")] Bowler bowler)
         {
             if (ModelState.IsValid)
             {
@@ -116,13 +134,16 @@ namespace core2Bowling.Controllers
                 .Include(b => b.BowlerAverage)
                 .SingleOrDefaultAsync(m => m.BowlerID == id);
 
+            bowler.LeaveDate = bowler.InActivity ? null : bowler.LeaveDate;
+
             if (bowler == null)
             {
                 return NotFound();
             }
 
             if (await TryUpdateModelAsync<Bowler>(bowler, "",
-                b=>b.Name,b=>b.Group, b=>b.InActivity, b=>b.BowlerAverage))
+                b=>b.Name,b=>b.Group, b=>b.InActivity, b=>b.BowlerAverage,
+                b=>b.RegisterDate, b=>b.LeaveDate, b=>b.Bigo))
             {
                 try
                 {

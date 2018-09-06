@@ -31,12 +31,36 @@
 </div>
 
 <div class="form-group">
+    <label asp-for="RegisterDate" class="control-label"></label>
+    <input type="text" id="RegisterDate" name="RegisterDate" class="form-control date form_datetime" data-date="" readonly
+           value="@(((string)ViewContext.RouteData.Values["action"])=="Edit" ? 
+               Model.RegisterDate.ToString("yyyy-MM-dd"): DateTime.Now.ToString("yyyy-MM-dd"))" />
+    <span asp-validation-for="RegisterDate" class="text-danger" />
+</div>
+
+<div class="form-group">
     <div class="checkbox">
         <label>
             <input asp-for="InActivity" /> @Html.DisplayNameFor(model => model.InActivity)
         </label>
     </div>
 </div>
+
+<div class="form-group">
+    <label asp-for="LeaveDate" class="control-label"></label>
+    <input type="text" id="LeaveDate" name="LeaveDate" class="form-control date form_datetime" data-date="" readonly
+           value="@(((string)ViewContext.RouteData.Values["action"])=="Edit" ? 
+               Model.LeaveDate?.ToString("yyyy-MM-dd"): "")" />
+    <span asp-validation-for="LeaveDate" class="text-danger" />
+</div>
+
+
+<div class="form-group">
+    <label asp-for="Bigo" class="control-label"></label>
+    <input asp-for="Bigo" class="form-control" />
+    <span asp-validation-for="Bigo" class="text-danger" />
+</div>
+
 <div class="form-group">
     <input type="submit" value="Save" class="btn btn-default" />
 </div>

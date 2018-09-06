@@ -21,14 +21,31 @@ namespace core2Bowling.Controllers
         }
 
         // GET: Games
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string gameGroup)
         {
 
             var group = User.FindFirst("UserGroup").Value;
-            group = group == "All" ? "" : group;
 
-            return View(await _context.Games.Where(g=>g.Group.Contains(group))
-                .OrderByDescending(g=>g.Playtime).ToListAsync());
+            if (string.IsNullOrEmpty(gameGroup))
+            {
+                if (group == "All")
+                {
+                    gameGroup = "RedPin";
+                }
+                else
+                {
+                    gameGroup = group;
+                }
+
+            }
+
+            if (group != "All" && group != gameGroup)
+            {
+                return NotFound();
+            }
+
+            return View(await _context.Games.Where(g=>g.Group.Contains(gameGroup)).OrderByDescending(g=>g.Playtime).ToListAsync());
+
         }
 
         // GET: Games/Details/5
