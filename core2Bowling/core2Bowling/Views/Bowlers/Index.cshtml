@@ -130,9 +130,9 @@
                 @Html.DisplayFor(modelItem => item.BowlerAverage.Bigo)
             </td>
             <td class="td-last">
-                <a asp-action="Edit" asp-route-id="@item.BowlerID">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.BowlerID">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.BowlerID">Delete</a>
+                <a asp-action="Edit" asp-route-id="@item.BowlerID">수정</a> |
+                @*<a asp-action="Details" asp-route-id="@item.BowlerID">Details</a> |*@
+                <a asp-action="Delete" asp-route-id="@item.BowlerID">삭제</a>
             </td>
         </tr>
 
@@ -142,6 +142,7 @@
 
             }
         }
+       
     </tbody>
 </table>
 

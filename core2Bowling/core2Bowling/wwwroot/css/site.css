@@ -68,7 +68,7 @@ body {
     padding: 4px 10px 4px 10px;
 }
 
-    .style-select select option:hover {
+.style-select select option:hover {
         background: #EEEEEE;
     }
 
@@ -96,6 +96,13 @@ body {
     margin-bottom: 2px;
 }*/
 
+/*.navbar-inverse .navbar-nav > .active > a, 
+.navbar-inverse .navbar-nav > .active > a:hover,
+.navbar-inverse .navbar-nav > .active > a:focus
+{
+    color : yellow;
+    text-decoration :underline;
+}*/
 
 
 /*테이블 type01*/

@@ -9,27 +9,26 @@
 <h4>Game</h4>
 <hr />
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-8">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
 
-            
+
             @*<div class="form-group">
-                <label asp-for="Playtime" class="control-label"></label>
-                <input asp-for="Playtime" class="form-control" />
-                <span asp-validation-for="Playtime" class="text-danger"></span>
-            </div>*@
+            <label asp-for="Playtime" class="control-label"></label>
+            <input asp-for="Playtime" class="form-control" />
+            <span asp-validation-for="Playtime" class="text-danger"></span>
+        </div>*@
 
 
             <div class="form-group">
                 <label asp-for="Playtime" class="control-label"></label>
                 <div class="input-group date form_datetime" data-date="">
-                    <input type="text" class="form-control" readonly id="Playtime" name="Playtime" value="@DateTime.Now.ToString("yyyy-MM-dd tt hh:mm")"/>
+                    <input type="text" class="form-control" readonly id="Playtime" name="Playtime" value="@DateTime.Now.ToString("yyyy-MM-dd tt hh:mm")" />
 
                     <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
                 </div>
-
             </div>
 
             <div class="form-group">
@@ -58,26 +57,34 @@
             </div>
 
             <div class="form-group">
+                <div class="checkbox">
+                    <label>
+                        <input asp-for="bCalTotal" /> @Html.DisplayNameFor(model => model.bCalTotal)
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
                 <label asp-for="Penalty" class="control-label"></label>
                 <input asp-for="Penalty" class="form-control" />
                 <span asp-validation-for="Penalty" class="text-danger"></span>
             </div>
-            
+
             <div class="form-group">
                 <label asp-for="Group" class="control-label"></label>
                 <select class="form-control" asp-for="Group">
                     @if (User.IsInRole("Admin"))
-                    {
-                        <option value="">--팀 선택--</option>
-                        <option value="Redpin">RedPin</option>
-                        <option value="Family">Family</option>
+            {
+                <option value="">--팀 선택--</option>
+                <option value="RedPin">RedPin</option>
+                <option value="Family">Family</option>
 
-                    }
-                    else
-                    {
-                        <option value="@User.FindFirst("UserGroup").Value">@User.FindFirst("UserGroup").Value</option>
+    }
+    else
+    {
+        <option value="@User.FindFirst("UserGroup").Value">@User.FindFirst("UserGroup").Value</option>
 
-                    }
+}
 
                 </select>
                 @*<input asp-for="Group" class="form-control" />*@
@@ -91,7 +98,7 @@
                     </label>
                 </div>
             </div>
-            
+
             <div class="form-group">
                 <div class="checkbox">
                     <label>
@@ -99,10 +106,11 @@
                     </label>
                 </div>
             </div>
-            
+
             <div class="form-group">
                 <label asp-for="GameMemo" class="control-label"></label>
-                <input asp-for="GameMemo" class="form-control" />
+                @*<input asp-for="GameMemo" class="form-control" />*@
+                <textarea asp-for="GameMemo" class="form-control" rows="5"></textarea>
                 <span asp-validation-for="GameMemo" class="text-danger"></span>
             </div>
 
@@ -111,6 +119,7 @@
             </div>
         </form>
     </div>
+    <div class="col-md-4">**</div>
 </div>
 
 <div>
@@ -146,7 +155,8 @@
 
         });
 
-      
+
+
 
         $(function () {
             $("#Place").hide();

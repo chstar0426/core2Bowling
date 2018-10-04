@@ -7,6 +7,7 @@
     int penalty = game.Penalty;  // 우승팀 차감점수
     bool fine = game.bFine; //벌금표시
 
+    
 }
 <h2>게임상세정보 &nbsp;&nbsp;<small><i class="glyphicon glyphicon glyphicon-hand-right"></i> 각 게임에 대한 상세 기록입니다</small></h2>
 <hr />
@@ -19,6 +20,7 @@
         &nbsp;&nbsp; | &nbsp;&nbsp; @game.Playtime  (@game.Place)
         &nbsp;&nbsp; | &nbsp;&nbsp;  @(game.bFine ? "벌금 있음" : "벌금 없음")
         &nbsp;&nbsp; | &nbsp;&nbsp;  @(game.bHandicap ? "핸디 적용" : "핸디 미적용")
+        &nbsp;&nbsp; | &nbsp;&nbsp;  @(game.bCalTotal ? "총점 계산" : "평균계산") / @game.Penalty 감점
         <div class="pull-right">
             @if (!User.IsInRole("Member"))
             {
@@ -29,10 +31,10 @@
         </div>
         @if (!string.IsNullOrEmpty(game.GameMemo))
         {
-            <br />
-            <i class="glyphicon glyphicon glyphicon-arrow-right" style="padding-top:15px;"></i> <strong>@game.GameMemo</strong>
+            <br /><br />
+            @*<i class="glyphicon glyphicon glyphicon-arrow-right" style="padding-top:15px;"></i>*@ <pre><strong>@game.GameMemo</strong></pre>
         }
-        
+
     </div>
 </div>
 
@@ -75,6 +77,7 @@
 
                 string winwin = string.Empty;
                 string winNext = string.Empty;
+                string winPre = string.Empty;
 
 
                 int[] downScoreTeam = new int[Model.Select(t => t.Team.TeamName).Distinct().Count()];
@@ -97,7 +100,6 @@
                                 @:<td></td>
                                 @:<td></td>
 
-
                             }
 
                         }
@@ -106,7 +108,7 @@
                             <td colspan="@(colcnt * 2)">
                                 @if (!User.IsInRole("Member"))
                                 {
-                                    <a asp-action="Edit" asp-route-id="@roundID">점수입력</a> @:|
+                                    <a asp-action="Edit" asp-route-id="@roundID" asp-route-winTeam="@winPre">점수입력</a> @:|
                                     <a asp-action="EditTeam" asp-route-id="@roundID">팀수정</a> @:|
                                     <a asp-action="NextTeam" asp-route-id="@roundID">다음경기</a> @:|
                                     <a asp-action="DelTeam" asp-route-id="@roundID">게임삭제</a>
@@ -132,8 +134,7 @@
 
                 @:<div class="tab-pane @selectActive" id="tab_game_@round">
                     @:<table class="table table-bordered">
-
-
+                    
                         //테이블 상단 총점 처리
                         teamName = string.Empty;
 
@@ -148,12 +149,17 @@
 
                         foreach (var g in TeamScore)
                         {
-                            var imsi = g.Sum(a => a.Score);
+                            //g.Sum
+                            //int imsi = game.bCalTotal ? g.Sum(a => a.Score) : (int)Math.Round(g.Average(a => a.Score));
+                            int imsi = g.Sum(a => a.Score); 
 
                             if (g.Key == winwin)
                             {
                                 imsi -= penalty;
                             }
+
+                            imsi = game.bCalTotal ? imsi : (int)Math.Round(imsi / (float)g.Count());
+                            
                             listScore.Add(imsi);
 
                         };
@@ -162,10 +168,7 @@
 
                         <tr>
                             @{
-
-                                string winPre = string.Empty;
-
-
+                                
                                 winPre = winNext;
 
                             }
@@ -173,7 +176,13 @@
                             {
                                 string selectedRow = "";
 
-                                int sScore = s.Sum(a => a.Score) - ((winPre == s.Key) ? penalty : 0);
+                                int imsi=s.Sum(a => a.Score) - ((winPre == s.Key) ? penalty : 0);
+
+                                //g.Sum
+                                //int sScore = (game.bCalTotal ? s.Sum(a => a.Score) : (int)Math.Round(s.Average(a => a.Score))) - ((winPre == s.Key) ? penalty : 0);
+                                
+                                int sScore = game.bCalTotal ? imsi : (int)Math.Round(imsi / (float)s.Count());
+
 
 
                                 if (sScore >= maxTeamScore && maxTeamScore != 0)
@@ -221,7 +230,7 @@
                     {
                         styleScore = "overScore";
                     }
-                    else if (item.Score - imsiAvg < 0)
+                    else if (item.Score - imsiAvg < 0 && item.Bowler.Group!="zGroup")
                     {
 
                         styleScore = (fine == false ? "" : "downScore");
@@ -244,8 +253,7 @@
                                 {
                                     @:<td></td>
                                     @:<td></td>
-
-
+                                    
                                 }
                             }
                             @:</tr>
@@ -300,12 +308,15 @@
         @*마지막테이블 종료*@
         <tr>
             <td colspan="@(colcnt*2)">
-                @if (Model.Count() > 0 && !User.IsInRole("Member"))
+                @if (Model.Count() > 0)
                 {
-                    <a asp-action="Edit" asp-route-id="@roundID">점수입력</a> @:|
-                    <a asp-action="EditTeam" asp-route-id="@roundID">팀수정</a> @:|
-                    <a asp-action="NextTeam" asp-route-id="@roundID">다음경기</a> @:|
-                    <a asp-action="DelTeam" asp-route-id="@roundID">게임삭제</a> //
+                    @if (!User.IsInRole("Member"))
+                    {
+                        <a asp-action="Edit" asp-route-id="@roundID" asp-route-winTeam="@winPre">점수입력</a> @:|
+                        <a asp-action="EditTeam" asp-route-id="@roundID">팀수정</a> @:|
+                        <a asp-action="NextTeam" asp-route-id="@roundID">다음경기</a> @:|
+                        <a asp-action="DelTeam" asp-route-id="@roundID">게임삭제</a>
+                    }
                     <div class="pull-right">@(fine == false ? "" : "에바벌금 : " + string.Format("{0:n0}", (downScoreCount * 1000)))</div>
                 }
 
@@ -320,7 +331,14 @@
 </div>
 </div>
 
-<div class="pull-right">@(fine == false ? "" : "총 에바벌금 : " + string.Format("{0:n0}", (downScoreTotal * 1000)))</div>
+<div class="pull-right">
+    <p>@(fine == false ? "" : "총 에바벌금 : " + string.Format("{0:n0}", (downScoreTotal * 1000)))</p>    
+    <a asp-controller="Games" asp-action="Index" asp-route-gameGroup="@game.Group"  asp-route-gameKind="@Convert.ToInt32(Context.Request.Cookies["GameKind"])" 
+       asp-route-cVal="true" class="btn btn-danger pull-right">Back to List</a>
+</div>
+
+
+    
 
 
 @if (fine)

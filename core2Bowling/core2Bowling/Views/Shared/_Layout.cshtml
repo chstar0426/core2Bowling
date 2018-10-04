@@ -37,19 +37,19 @@
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
 
-                    <li><a asp-area="" asp-controller="Games" asp-action="Index">경기관리</a></li>
+                    @await Component.InvokeAsync("MainMenu")
+
+                    @*<li class="active"><a asp-area="" asp-controller="Games" asp-action="Index">경기관리</a></li>
                     <li><a asp-area="" asp-controller="RecordStatics" asp-action="CalPenaltyAvg">벌금에버관리</a></li>
                     <li><a asp-area="" asp-controller="RecordStatics" asp-action="CalYearAvg">에버관리</a></li>
                     @if (User.IsInRole("Admin"))
                     {
                         <li><a asp-area="" asp-controller="Bowlers" asp-action="Index">회원관리</a></li>
                         <li><a asp-area="" asp-controller="YearAverages" asp-action="Index">년도별관리</a></li>
-                    }
-                @*<li><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
-                <li><a asp-area="" asp-controller="Home" asp-action="About">About</a></li>
-                <li><a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a></li>*@
+                    }*@
                 </ul>
 
+                
                 @await Html.PartialAsync("_LoginPartial");
             </div>
         </div>

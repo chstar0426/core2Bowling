@@ -82,8 +82,15 @@ namespace core2Bowling.Controllers
                  && (DateTime.Parse(startDate) <= g.Playtime && DateTime.Parse(endDate) >= g.Playtime))
                  .OrderBy(g => g.Playtime);
 
-            ViewData["GameContents"] = gameList.Select(g => g.GameContent).ToList();   //게임 7-1, 8-1 등  표시
+            ViewData["GameContents"] = gameList.Select(g => new GameTitle {
+                GameID= g.ID,
+                GameContent= g.GameContent
+            }).ToList();   //게임 7-1, 8-1 등  표시
+
             List<int> gameIds = gameList.Select(g => g.ID).ToList();  // 게임 Id만 가저욤
+
+
+            
             int gameCnt = gameIds.Count;  // 게임수
 
 
@@ -138,8 +145,9 @@ namespace core2Bowling.Controllers
 
 
             //3달동안 경기에 한번도 참여하지 못한 멤버 추가
-            var bowlers = _context.Bowlers.Where(t => t.Group == TeamGroup && ((t.LeaveDate >= DateTime.Parse(startDate) && t.RegisterDate <= DateTime.Parse(endDate) ) 
-                                                                                || t.InActivity == false)).ToList();
+             var bowlers = _context.Bowlers.Where(t => t.Group == TeamGroup &&
+                ((t.RegisterDate <= DateTime.Parse(endDate) && t.LeaveDate >= DateTime.Parse(startDate)) || t.RegisterDate <= DateTime.Parse(endDate) && t.LeaveDate == null)
+                ).ToList();
 
             var exceptBowlers = bowlers.Select(b => b.BowlerID).Except(returnGames.Select(r => r.BowlerID));
 
@@ -162,9 +170,9 @@ namespace core2Bowling.Controllers
 
 
             //소트 하여 반환 (탈퇴자를 아래로 몰아서 관리)
-            //return View(returnGames.OrderBy(g => g.InActivity).ThenByDescending(g => g.Total));
+            return View(returnGames.OrderBy(g => g.InActivity).ThenByDescending(g => g.Total));
 
-            return View(returnGames.OrderByDescending(g => g.Total));
+            //return View(returnGames.OrderByDescending(g => g.Total));
 
         }
 
@@ -291,7 +299,12 @@ namespace core2Bowling.Controllers
                  .OrderBy(g => g.Playtime);
 
 
-            ViewData["GameContents"] = gameList.Select(g => g.GameContent).ToList(); //게임 7-1, 8-1 등  표시
+            ViewData["GameContents"] = gameList.Select(g => new GameTitle
+            {
+                GameID = g.ID,
+                GameContent = g.GameContent
+            }).ToList();   //게임 7-1, 8-1 등  표시
+
             List<int> gameIds = gameList.Select(g => g.ID).ToList();  //게임 Id만 가져옴
 
 
@@ -348,9 +361,9 @@ namespace core2Bowling.Controllers
             
             //그룹화 새로 조정
             //에버리지 순위 대로 소티(탈퇴자를 아래로 몰아서 관리)
-            //var groupGames = games.GroupBy(t => t.BowlerID).OrderBy(g=>g.First().InActivity).ThenByDescending(g => g.Average(t => t.monAvg));
+            var groupGames = games.GroupBy(t => t.BowlerID).OrderBy(g=>g.First().InActivity).ThenByDescending(g => g.Average(t => t.monAvg));
 
-            var groupGames = games.GroupBy(t => t.BowlerID).OrderByDescending(g => g.Average(t => t.monAvg));
+            //var groupGames = games.GroupBy(t => t.BowlerID).OrderByDescending(g => g.Average(t => t.monAvg));
 
 
             return View(groupGames.ToList());

@@ -10,7 +10,7 @@
 <h4>Game</h4>
 <hr />
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-8">
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="ID" />
@@ -56,6 +56,14 @@
             </div>
 
             <div class="form-group">
+                <div class="checkbox">
+                    <label>
+                        <input asp-for="bCalTotal" /> @Html.DisplayNameFor(model => model.bCalTotal)
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
                 <label asp-for="Penalty" class="control-label"></label>
                 <input asp-for="Penalty" class="form-control" />
                 <span asp-validation-for="Penalty" class="text-danger"></span>
@@ -65,17 +73,17 @@
                 <label asp-for="Group" class="control-label"></label>
                 <select class="form-control" asp-for="Group">
                     @if (User.IsInRole("Admin"))
-                    {
-                       <option value="">--팀 선택--</option>
-                        <option value="Redpin">RedPin</option>
-                        <option value="Family">Family</option>
+            {
+                <option value="">--팀 선택--</option>
+                <option value="RedPin">RedPin</option>
+                <option value="Family">Family</option>
 
-                     }
-                    else
-                    {
-                      <option value="@User.FindFirst("UserGroup").Value">@User.FindFirst("UserGroup").Value</option>
+    }
+    else
+    {
+        <option value="@User.FindFirst("UserGroup").Value">@User.FindFirst("UserGroup").Value</option>
 
-                    }
+}
                 </select>
                 @*<input asp-for="Group" class="form-control" />*@
                 <span asp-validation-for="Group" class="text-danger"></span>
@@ -97,18 +105,17 @@
             </div>
             <div class="form-group">
                 <label asp-for="GameMemo" class="control-label"></label>
-                <input asp-for="GameMemo" class="form-control" />
+                @*<input asp-for="GameMemo" class="form-control" />*@
+                <textarea asp-for="GameMemo" class="form-control" rows="5"></textarea>
                 <span asp-validation-for="GameMemo" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-default" />
+                <a asp-action="Index" asp-route-gameGroup="@Model.Group" asp-route-gameKind="@Convert.ToInt32(Context.Request.Cookies["GameKind"])" asp-route-cVal="true" class="btn btn-info" >Back to List</a>
             </div>
         </form>
     </div>
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
+    <div class="col-md-4"></div>
 </div>
 
 

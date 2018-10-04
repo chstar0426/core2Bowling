@@ -165,7 +165,7 @@ namespace core2Bowling.Models
 
             var games = new Game[]
             {
-                new Game{ Playtime=DateTime.Parse("2018-06-13 20:00"), GameKind=GameKind.정기전, Penalty=100, Group="RedPin", Place="현대볼링장", GameContent="6-1",
+                new Game{ Playtime=DateTime.Parse("2018-06-13 20:00"), GameKind=GameKind.정기전, bCalTotal=true,  Penalty=100, Group="RedPin", Place="현대볼링장", GameContent="6-1",
                             bFine=true, bHandicap=true}
             };
 

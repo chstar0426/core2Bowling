@@ -21,11 +21,13 @@
     <None Include="Views\Login\Forbidden.cshtml" />
     <None Include="Views\Login\UserLogin.cshtml" />
     <None Include="Views\Login\UserLogout.cshtml" />
+    <None Include="Views\Shared\Components\MainMenu\Default.cshtml" />
     <None Include="Views\UserIdentities\Create.cshtml" />
     <None Include="Views\UserIdentities\Delete.cshtml" />
     <None Include="Views\UserIdentities\Details.cshtml" />
     <None Include="Views\UserIdentities\Edit.cshtml" />
     <None Include="Views\UserIdentities\Index.cshtml" />
+    <None Include="wwwroot\lib\jquery.cookie\src\jquery.cookie.js" />
     <None Include="wwwroot\lib\bootstrap-datetimepicker\.gitattributes" />
     <None Include="wwwroot\lib\bootstrap-datetimepicker\.gitignore" />
     <None Include="wwwroot\lib\bootstrap-datetimepicker\.jshintrc" />
@@ -112,6 +114,12 @@
     <None Include="wwwroot\lib\bootstrap-datetimepicker\tests\suites\mouse_navigation\2012.js" />
     <None Include="wwwroot\lib\bootstrap-datetimepicker\tests\suites\mouse_navigation\all.js" />
     <None Include="wwwroot\lib\bootstrap-datetimepicker\tests\suites\options.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="Views\TeamMembers\Edit.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
   </ItemGroup>
 
 </Project>

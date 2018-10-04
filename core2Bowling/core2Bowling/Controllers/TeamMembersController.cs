@@ -699,7 +699,7 @@ namespace core2Bowling.Controllers
            
             var teamMembers = await _context.TeamMembers
                 .Include(t => t.Bowler)
-                    .ThenInclude(b=>b.BowlerAverage)
+                //   .ThenInclude(b=>b.BowlerAverage)  핸디를 클라이언트 자바스트립트로 처리
                .Include(t => t.Team)
                .Where(t => t.Team.SubGameID == Id)
                 .OrderBy(t => t.Team.TeamOrder)
@@ -715,18 +715,16 @@ namespace core2Bowling.Controllers
             try
             {
                 int i = 0;
-
-                var handiCap = 0;
-               
+                
                 foreach (var item in teamMembers)
                 {
-                    handiCap = inHandi == false ? 0 : item.Bowler.BowlerAverage.Handicap;
-
-                    if (item.Score != inputScores[i] + handiCap)
+                    if (item.Score != inputScores[i])
                     {
-                        item.Score = inputScores[i] + handiCap;
+                        item.Score = inputScores[i];   //핸디 포함 점수 (클라이언트 자바스트립트에서 핸디계산을 하여 전송 함)
                         _context.Update(item);
+
                     }
+                   
                     i++;
 
                 }

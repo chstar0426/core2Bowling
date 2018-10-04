@@ -1,13 +1,20 @@
 ﻿@model IEnumerable<core2Bowling.Models.Game>
 
 @{
-    ViewData["Title"] = "Index";
-    string[] gGroup = { "RedPin", "Family"};
-    string qGroup = Context.Request.Query["gameGroup"];
+        ViewData["Title"] = "Index";
+        string[] gGroup = {"RedPin", "Family" };
+        string[] gKind = {"정기전", "비정기전", "개인기록", "전체" };
+        string qGroup = Context.Request.Query["gameGroup"];
+        string qKind = Context.Request.Query["gameKind"];
+
+
         qGroup = string.IsNullOrEmpty(qGroup) ? "RedPin" : qGroup;
+        qKind = string.IsNullOrEmpty(qKind) ? gKind[3] : gKind[int.Parse(qKind)];
 
 
-}
+
+
+    }
 
 <h2>게임목록 &nbsp;&nbsp;<small><i class="glyphicon glyphicon glyphicon-hand-right"></i> 경기 현황입니다</small></h2>
 <hr />
@@ -20,28 +27,30 @@
     {
         <a asp-action="Create" class="pull-left btn btn-default">Create New</a>
     }
-   
+
     @if (User.IsInRole("Admin"))
     {
-
         <div class="btn-group pull-left" style="margin-left:50px" data-toggle="buttons">
 
             @foreach (var item in gGroup)
             {
                 string SelectedGroup = string.Empty;
+                string CheckedGroup = string.Empty;
 
                 if (item == qGroup)
                 {
                     SelectedGroup = "active";
+                    CheckedGroup = "checked=checked";
 
                 }
                 <label class="btn btn-default blue @SelectedGroup">
-                    <input type="radio" name="opt" class="toggle" value="@item" />@item
+                    <input type="radio" name="optGroup" class="toggle optCheck" value="@item" @CheckedGroup />@item
                 </label>
 
             }
 
         </div>
+
 
         <div>
             <form asp-action="AutoPractice" class="pull-right">
@@ -58,6 +67,42 @@
         </div>
 
     }
+    else
+    {
+        <div class="btn-group pull-left" style="margin-left:50px" data-toggle="buttons">
+
+            <label class="btn btn-default blue active">
+                <input type="radio" name="optGroup" class="toggle optCheck" value="@User.FindFirst("UserGroup").Value" checked="checked" />@User.FindFirst("UserGroup").Value
+            </label>
+        </div>
+
+
+    }
+
+
+    <div class="btn-group pull-left" style="margin-left:50px" data-toggle="buttons">
+
+        @{int i = 0; }
+        @foreach (var item in gKind)
+        {
+            string SelectedKind = string.Empty;
+            string CheckedKind = string.Empty;
+
+            if (item == qKind)
+            {
+                SelectedKind = "active";
+                CheckedKind = "checked=checked";
+
+            }
+            <label class="btn btn-default blue @SelectedKind">
+                <input type="radio" name="optKind" class="toggle optCheck" value="@i" @CheckedKind />@item
+            </label>
+
+            i++;
+
+        }
+
+    </div>
 
 
 </div>
@@ -103,67 +148,103 @@
     </thead>
     <tbody>
         @foreach (var item in Model)
-        {
-<tr>
-    <td>
-        @Html.DisplayFor(modelItem => item.Playtime)
-    </td>
-    <td>
-        @Html.DisplayFor(modelItem => item.Place)
-    </td>
-    <td>
-        @Html.DisplayFor(modelItem => item.GameKind)
-    </td>
-    <td>
-        @Html.DisplayFor(modelItem => item.GameContent)
-    </td>
-    <td>
-        @Html.DisplayFor(modelItem => item.Penalty)
-    </td>
-    <td>
-        @Html.DisplayFor(modelItem => item.Group)
-    </td>
-    <td>
-        @Html.DisplayFor(modelItem => item.bFine)
-    </td>
-    <td>
-        @Html.DisplayFor(modelItem => item.bHandicap)
-    </td>
-    @*<td>
-            @Html.DisplayFor(modelItem => item.GameMemo)
-        </td>*@
-    <td class="td-last">
-        <a asp-controller="TeamMembers" asp-action="Index" asp-route-id="@item.ID" class="text-info">경기상세</a>
-        @if (!User.IsInRole("Member"))
-        {
-            @:|
-            <a asp-action="Edit" asp-route-id="@item.ID" class="text-warning">경기수정</a> @:|
-            <a asp-action="Delete" asp-route-id="@item.ID" class="text-danger">경기삭제</a>
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Playtime)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Place)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.GameKind)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.GameContent)
+            </td>
+            <td>
+                @(item.bCalTotal ? "총점" : "평균")계산 /
+                @Html.DisplayFor(modelItem => item.Penalty)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Group)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.bFine)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.bHandicap)
+            </td>
+            @*<td>
+                @Html.DisplayFor(modelItem => item.GameMemo)
+            </td>*@
+            <td class="td-last">
+                <a asp-controller="TeamMembers" asp-action="Index" asp-route-id="@item.ID" class="text-info pagingClick">경기상세</a>
+                @if (!User.IsInRole("General"))
+                {
+                    @:|
+                    <a asp-action="Edit" asp-route-id="@item.ID" class="text-warning pagingClick">경기수정</a> @:|
+                    <a asp-action="Delete" asp-route-id="@item.ID" class="text-danger">경기삭제</a>
 
-        }
+                }
 
         @*<a asp-action="Details" asp-route-id="@item.ID">Details</a> |
-            <a asp-controller="TeamMembers" asp-action="IndexVertical" asp-route-id="@item.ID">경기설정2</a>
-            <a asp-controller="TeamMembers" asp-action="IndexGame" asp-route-id="@item.ID">경기설정3</a>*@
-    </td>
-</tr>
-}
+        <a asp-controller="TeamMembers" asp-action="IndexVertical" asp-route-id="@item.ID">경기설정2</a>
+        <a asp-controller="TeamMembers" asp-action="IndexGame" asp-route-id="@item.ID">경기설정3</a>*@
+            </td>
+        </tr>
+    }
+
+       
     </tbody>
 </table>
 
+<div class="text-center">
+    <paging url="@Context.Request.Path"
+            page-index="@ViewBag.PageIndex"
+            page-size=10
+            page-etc="@ViewBag.Etc"
+            record-count=@ViewBag.Count
+            page-counter=5
+            search-mode='false'
+            search-field='@Context.Request.Query["SearchField"].ToString()'
+            search-query='@Context.Request.Query["SearchQuery"].ToString()'>
+    </paging>
+</div>
 @section Scripts {
-
+    <script src="~/lib/jquery.cookie/src/jquery.cookie.js"></script>
     <script>
 
         $(function () {
 
-            $('input[type=radio]').change(function () {
-                
-                //alert($(this).val());
-                document.location.href = '/games/index?gameGroup=' + $(this).val();
-                
+            //var is_mobile = false;
+
+            //if ($('#some-element').css('display')=='none') {
+
+            //    is_mobile = true;
+            //}
+
+
+
+            $('.optCheck').change(function () {
+
+                //alert($("input[name='optKind']:checked").val());
+                //alert($("input[name='optGroup']:checked").val());
+                document.location.href = '/games/index?gameGroup=' + $("input[name='optGroup']:checked").val() + '&gameKind=' + $("input[name='optKind']:checked").val();
+
             });
-           
+
+
+            $(".pagingClick").click(function () {
+
+                //alert($("input[name = 'optKind']:checked").val());
+                $.cookie('PageIndex', "@Html.Raw(ViewBag.PageIndex)", { expires: 1, path: '/' });
+                $.cookie('GameKind', $("input[name = 'optKind']:checked").val(), { expires: 1, path: '/' });
+                //alert($.cookie('PageIndex'));
+
+            });
+
+
         });
 
     </script>

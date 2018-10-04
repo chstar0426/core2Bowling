@@ -21,9 +21,19 @@ namespace core2Bowling.Controllers
         }
 
         // GET: Games
-        public async Task<IActionResult> Index(string gameGroup)
+        public async Task<IActionResult> Index(string gameGroup, int gameKind=3, bool cVal = false)
         {
 
+             int pageIndex = 0;
+             int pageSize = 10;
+
+            //[1] 쿼리스트링에 따른 페이지 보여주기
+            if (!string.IsNullOrEmpty(Request.Query["Page"].ToString()))
+            {
+                // Page는 보여지는 쪽은 1, 2, 3, ... 코드단에서는 0, 1, 2, ...
+                pageIndex = Convert.ToInt32(Request.Query["Page"]) - 1;
+            }
+            
             var group = User.FindFirst("UserGroup").Value;
 
             if (string.IsNullOrEmpty(gameGroup))
@@ -38,13 +48,53 @@ namespace core2Bowling.Controllers
                 }
 
             }
-
+            
             if (group != "All" && group != gameGroup)
             {
                 return NotFound();
             }
 
-            return View(await _context.Games.Where(g=>g.Group.Contains(gameGroup)).OrderByDescending(g=>g.Playtime).ToListAsync());
+            //[2] 쿠키를 사용한 리스트 페이지 번호 유지 적용(Optional): 
+            //    100번째 페이지 보고 있다가 다시 리스트 왔을 때 100번째 페이지 표시
+            if (cVal)
+            {
+                if (!String.IsNullOrEmpty(Request.Cookies["PageIndex"]))
+                {
+                    pageIndex = Convert.ToInt32(Request.Cookies["PageIndex"]) - 1;
+                }
+                else
+                {
+                    pageIndex = 0;
+                }
+                
+            }
+            
+            var games = new List<Game>();
+
+            if (gameKind < 3)
+            {
+                games = await _context.Games.Where(g => g.Group.Contains(gameGroup) && g.GameKind == (GameKind)gameKind)
+                .OrderByDescending(g => g.Playtime)
+                 .Skip((pageIndex) * pageSize).Take(pageSize).ToListAsync();
+
+                ViewBag.Count = _context.Games.Where(g => g.Group.Contains(gameGroup) && g.GameKind == (GameKind)gameKind).Count();
+
+            }
+            else
+            {
+                games = await _context.Games.Where(g => g.Group.Contains(gameGroup))
+                .OrderByDescending(g => g.Playtime)
+                 .Skip((pageIndex) * pageSize).Take(pageSize).ToListAsync();
+
+                ViewBag.Count = _context.Games.Where(g => g.Group.Contains(gameGroup)).Count();
+
+            }
+
+
+            ViewBag.PageIndex = pageIndex + 1;
+            ViewBag.Etc = "&gameGroup=" + gameGroup + "&gameKind=" +  gameKind;
+            
+            return View(games);
 
         }
 
@@ -79,12 +129,13 @@ namespace core2Bowling.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Playtime,Place,GameKind,GameContent,Penalty,Group,bFine, bHandicap, GameMemo")] Game game)
+        public async Task<IActionResult> Create([Bind("Playtime,Place,GameKind,GameContent,bCalTotal,Penalty,Group,bFine, bHandicap, GameMemo")] Game game)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
+                    
                     _context.Add(game);
                     await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
@@ -175,6 +226,7 @@ namespace core2Bowling.Controllers
                 Place = "현대볼링장",
                 bFine = false,
                 bHandicap=false,
+                bCalTotal = true,
                 Playtime = DateTime.Now
 
             };
@@ -310,14 +362,14 @@ namespace core2Bowling.Controllers
             var game = await _context.Games.SingleOrDefaultAsync(m => m.ID == id);
 
             if (await TryUpdateModelAsync<Game>(game,"",
-                g=>g.Playtime, g=>g.Place, g=>g.GameKind, g => g.GameContent, g=>g.Penalty, 
+                g=>g.Playtime, g=>g.Place, g=>g.GameKind, g => g.GameContent, g=>g.bCalTotal, g=>g.Penalty, 
                 g=>g.bFine, g=>g.bHandicap, g=>g.GameMemo))
             {
 
                 try
                 {
                     await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index));
+                    return RedirectToAction(nameof(Index), new { gameGroup = game.Group, gameKind = Convert.ToInt32(Request.Cookies["GameKind"]), cVal=true });
 
                 }
                 catch (DbUpdateException)
@@ -359,7 +411,7 @@ namespace core2Bowling.Controllers
             var game = await _context.Games.SingleOrDefaultAsync(m => m.ID == id);
             _context.Games.Remove(game);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index), new { gameGroup = game.Group, cVal = true });
 
         }
 

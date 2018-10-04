@@ -6,14 +6,13 @@
             @if (User.IsInRole("Admin"))
             {   
             <li>
-                <a asp-controller="UserIdentities" asp-action="Index">계정리스트</a>
+                <a asp-controller="UserIdentities" asp-action="Index">계정목록</a>
             </li>
             }
             <li>
-
                 @*<a asp-controller="UserIdentites" asp-action="Edit" asp-route-id="@User.FindFirst("UserId")">안녕하세요 [ @User.FindFirst("NicName").Value ]님! @User.Identity.Name</a>*@
                 <a asp-controller="UserIdentities" asp-action="Details" asp-route-id="@User.Identity.Name">
-                    안녕하세요  @User.FindFirst("NicName").Value 님! / [@User.FindFirst("UserGroup").Value 그룹]
+                    안녕하세요  @User.FindFirst("NicName").Value 님! [@User.FindFirst("UserGroup").Value 그룹]
                 </a>
             </li>
             <li>

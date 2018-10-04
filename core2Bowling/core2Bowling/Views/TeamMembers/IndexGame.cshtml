@@ -23,13 +23,14 @@
         &nbsp;&nbsp; | &nbsp;&nbsp;  @game.Playtime (@game.Place)
         &nbsp;&nbsp; | &nbsp;&nbsp;  @(game.bFine ? "벌금 있음" : "벌금 없음")
         &nbsp;&nbsp; | &nbsp;&nbsp;  @(game.bHandicap ? "핸디 적용" : "핸디 미적용")
+        &nbsp;&nbsp; | &nbsp;&nbsp;  @(game.bCalTotal ? "총점 계산" : "평균계산") / @game.Penalty 감점
         <div class="pull-right">
             <a asp-action="Index" asp-route-id="@ViewContext.RouteData.Values["Id"]">경기결과</a>
         </div>
         @if (!string.IsNullOrEmpty(game.GameMemo))
-        {
-                <br />
-                <i class="glyphicon glyphicon glyphicon-arrow-right" style="padding-top:15px;"></i> <strong>@game.GameMemo</strong>
+         {
+            <br /><br />
+            @*<i class="glyphicon glyphicon glyphicon-arrow-right" style="padding-top:15px;"></i>*@ <pre><strong>@game.GameMemo</strong></pre>
         }
     </div>
 </div>
@@ -40,7 +41,7 @@
 <div class="row">
     <div style="border-bottom: 2px solid #e0dcdc; margin-bottom:0px;" class="col-xs-12"></div>
 
-    <div class="col-xs-@(sortOrder ? 9 : 12)">
+    <div class="col-md-@(sortOrder ? 9 : 12)">
 
        <table class="table">
         <thead>
@@ -242,7 +243,7 @@
     </div>
 
 
-    <div class="@(sortOrder ? "col-xs-3" : "visible-xs")">
+    <div class="@(sortOrder ? "col-md-3" : "visible-md")">
         <table class="table">
             <thead>
                 <tr class="text-center">

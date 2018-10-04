@@ -52,6 +52,6 @@
     <form asp-action="Delete">
         <input type="hidden" asp-for="ID" />
         <input type="submit" value="Delete" class="btn btn-default" /> |
-        <a asp-action="Index">Back to List</a>
+        <a asp-action="Index" asp-route-gameGroup="@Model.Group" asp-route-cVal="true" class="btn btn-info">Back to List</a>
     </form>
 </div>

@@ -3,7 +3,7 @@
 @{
     ViewData["Title"] = "Index";
 
-    var lstContent = (List<string>)ViewData["GameContents"];
+    var lstContent = (List<GameTitle>)ViewData["GameContents"];
 
 }
 
@@ -69,7 +69,10 @@
                     <th>성명</th>
                     @foreach (var item in lstContent)
                     {
-                        <th>@item</th>
+                        <th>
+                            <a asp-controller="TeamMembers" asp-action="Index"
+                               asp-route-id="@item.GameID" target="_blank" class="pagingClick">@item.GameContent</a>
+                        </th>
                     }
                     <th>합</th>
                     <th style="width:100px">평균</th>
@@ -78,9 +81,10 @@
             <tbody>
                 @{
                     int orderNum = 0;  //일련번ㄴ호
+                    var lstPeriod = lstContent.Select(c => c.GameContent).ToList();
 
                 }
-                
+
 
                 @foreach (var groupBowler in Model)
                 {
@@ -94,20 +98,21 @@
 
                     <tr style="@(groupBowler.First().InActivity ? "color:#fff;background-color:#808080" : "")">
 
-                    @foreach (var item in groupBowler)
-                    {
-                        if (BowlerId != item.BowlerID)
+                        @foreach (var item in groupBowler)
                         {
-                            BowlerId = item.BowlerID;
+                            if (BowlerId != item.BowlerID)
+                            {
+                                BowlerId = item.BowlerID;
 
-                            <td>@orderNum.ToString() @*@(item.InActivity == true ? "탈퇴" : orderNum.ToString())*@</td>
-                            <td>@item.Name
+                                <td>@orderNum.ToString() @*@(item.InActivity == true ? "탈퇴" : orderNum.ToString())*@</td>
+                                <td>
+                                    @item.Name
                                 <input type="hidden" name="inputName" value="@item.BowlerID" />
                             </td>
 
                         }
 
-                        var idx = item.Period == null ? lstContent.Count() : lstContent.IndexOf(item.Period);
+                        var idx = item.Period == null ? lstPeriod.Count() : lstPeriod.IndexOf(item.Period);
 
                         if (item.Period == null)
                         {
@@ -159,66 +164,66 @@
 
                     }
 
-                    @if (contentNum < lstContent.Count)
-                    {
-                        for (int i = contentNum; i < lstContent.Count; i++)
+                        @if (contentNum < lstContent.Count)
                         {
-                            <td style="@(groupBowler.First().InActivity ?"" : "background-color:#eff1ef")"></td>
-                            contentNum++;
-                            emptyNum++;
+                            for (int i = contentNum; i < lstContent.Count; i++)
+                            {
+                                <td style="@(groupBowler.First().InActivity ?"" : "background-color:#eff1ef")"></td>
+                                contentNum++;
+                                emptyNum++;
 
+                            }
                         }
-                    }
 
-                    <td style="@(groupBowler.First().InActivity ?"" : "background-color:aliceblue")">@indiHap</td>
-                    <td class="td-last" style="@(groupBowler.First().InActivity ?"" : "background-color:aliceblue")">
-                        @((lstContent.Count - emptyNum == 0) ? 0 : Math.Round(indiHap / Convert.ToDouble(lstContent.Count - emptyNum)))
-                        
-                        @*관리자일때는 TextBox로 표시*@
-                        @if (User.IsInRole("Admin"))
-                        {
-                            <input type="text" name="inputAvg" style="width:40px;@(groupBowler.First().InActivity ? "background-color:#808080" : "")" value="@((groupBowler.First().InActivity ? -1 : 1 )*((lstContent.Count - emptyNum == 0) ? 1 : Math.Round(indiHap / Convert.ToDouble(lstContent.Count - emptyNum))))" />
-                            @*탈퇴 표시를 위해 탈퇴자는 음수(-)사용, 탈퇴 0점은 확인이 어려워 1점으로 표시*@
-                            @*@groupBowler.First().Name @indiHap @lstContent.Count @emptyNum*@
-                        }
-                        else
-                        {
+                        <td style="@(groupBowler.First().InActivity ?"" : "background-color:aliceblue")">@string.Format("{0:n0}", indiHap) </td>
+                        <td class="td-last" style="@(groupBowler.First().InActivity ?"" : "background-color:aliceblue")">
+                            @((lstContent.Count - emptyNum == 0) ? 0 : Math.Round(indiHap / Convert.ToDouble(lstContent.Count - emptyNum)))
 
-                            <input type="hidden" name="inputAvg" style="width:40px;" value="@((groupBowler.First().InActivity ? -1 : 1 )*((lstContent.Count - emptyNum == 0) ? 1 : Math.Round(indiHap / Convert.ToDouble(lstContent.Count - emptyNum))))" />
-                        }
-                    </td>
-                    
+                            @*관리자일때는 TextBox로 표시*@
+                            @if (!User.IsInRole("General"))
+                            {
+                                <input type="text" name="inputAvg" style="width:40px;@(groupBowler.First().InActivity ? "background-color:#808080" : "")" value="@((groupBowler.First().InActivity ? -1 : 1 )*((lstContent.Count - emptyNum == 0) ? 1 : Math.Round(indiHap / Convert.ToDouble(lstContent.Count - emptyNum))))" />
+                                @*탈퇴 표시를 위해 탈퇴자는 음수(-)사용, 탈퇴 0점은 확인이 어려워 1점으로 표시*@
+                                @*@groupBowler.First().Name @indiHap @lstContent.Count @emptyNum*@
+                            }
+                            else
+                            {
+
+                                <input type="hidden" name="inputAvg" style="width:40px;" value="@((groupBowler.First().InActivity ? -1 : 1 )*((lstContent.Count - emptyNum == 0) ? 1 : Math.Round(indiHap / Convert.ToDouble(lstContent.Count - emptyNum))))" />
+                            }
+                        </td>
+
 
                     </tr>
 
-                } 
+                }
 
-                </tbody>
-            </table>
+            </tbody>
+        </table>
 
-            <input type="hidden" name="hteamGroup" value="@ViewBag.TeamGroup" />
-            <input type="hidden" name="hthisYear" value="@ViewData["ThisYear"]" />
-            @if (User.IsInRole("Manager") || User.IsInRole("Admin"))
-            {
-                <div class="form-group">
-                    <input type="submit" value="에버산정" class="btn btn-default" />
-                    <span class="text-danger">산정하기 전 NaN, 년도별 에버 관리 인원을 확인하세요</span>
-                </div>
-            }
-        </div>
-    </form>
+        <input type="hidden" name="hteamGroup" value="@ViewBag.TeamGroup" />
+        <input type="hidden" name="hthisYear" value="@ViewData["ThisYear"]" />
+        @if (User.IsInRole("Manager") || User.IsInRole("Admin"))
+        {
+            <div class="form-group">
+                <input type="submit" value="에버산정" class="btn btn-default" />
+                <span class="text-danger">산정하기 전 NaN, 년도별 에버 관리 인원을 확인하세요</span>
+            </div>
+        }
+    </div>
+</form>
 
-    @section Styles{
+@section Styles{
 
-        <link href="~/lib/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet" />
-    }
+    <link href="~/lib/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet" />
+}
 
-    @section Scripts {
+@section Scripts {
+    <script src="~/lib/jquery.cookie/src/jquery.cookie.js"></script>
+    <script src="~/lib/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
+    <script src="~/lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.ko.js"></script>
 
-        <script src="~/lib/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
-        <script src="~/lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.ko.js"></script>
-
-        <script>
+    <script>
 
         $('.form_datetime').datetimepicker({
             language: 'ko',
@@ -285,11 +290,16 @@
 
             });
 
+            $(".pagingClick").click(function () {
+
+                $.cookie('PageIndex', "1", { expires: 1, path: '/' });
+
+            });
 
 
 
         });
 
-        </script>
+    </script>
 
-    }
+}

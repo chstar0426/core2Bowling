@@ -10,8 +10,6 @@
     int temptc = Model.Select(m => m.Team.TeamName).Distinct().Count();
     int teamCount = temptc > 4 ? 3 : 12/temptc;  //6개 기준
 
-    int teamRow = 0;
-
     bool inHandi = game.bHandicap;
 
 }
@@ -28,7 +26,8 @@
         &nbsp;&nbsp; | &nbsp;&nbsp;  @game.Playtime (@game.Place)
         &nbsp;&nbsp; | &nbsp;&nbsp;  @(game.bFine ? "벌금 있음" : "벌금 없음")
         &nbsp;&nbsp; | &nbsp;&nbsp;  @(game.bHandicap ? "핸디 적용" : "핸디 미적용")
-    </div>
+        &nbsp;&nbsp; | &nbsp;&nbsp;  @(game.bCalTotal ? "총점 계산" : "평균계산") / @game.Penalty 감점
+     </div>
 </div>
 
 
@@ -36,75 +35,237 @@
 
     <form asp-action="Edit">
 
-        <div asp-validation-summary="All" class="text-danger"></div>
-        @{ bool bTeam = false;
-        string teamName = string.Empty; }
+    <div asp-validation-summary="All" class="text-danger"></div>
+    @{ 
+        bool bTeam = false;
+        string teamName = string.Empty;
+
+    }
+
+    @*점수부분총괄 시작*@
+    <div> 
 
     @foreach (var item in Model)
     {
 
-
+        
         if (teamName != item.Team.TeamName)
         {
+
             if (bTeam == true)
             {
-                teamRow++;
                 @:</div>
-
-                if (teamRow % 4 ==0)
-                {
-                    @:<br /><div class="clearfix"></div>
-                }
-
             }
 
+       
             bTeam = true;
             teamName = item.Team.TeamName;
 
-        @:<div class="col-xs-@teamCount" style="margin-top:15px;border-right:1px solid green">
-              <p class="text-danger">@(teamName + "팀")</p>
-    
+            @:<div class="col-xs-@teamCount" style="margin-top:15px;border-right:1px solid green" name="teamContainer">
+            <p class="text-danger pull-left" style="margin-right:3px;">@(teamName + "팀") </p> 
+            <input type="radio" name="optWin" class="optWin pull-left" value="@teamName" disabled />
+            <div class="lbltotal pull-right"></div>  @*jquery로 점수 계산됨*@
+
+
+             @:<hr>
+
+
+
         }
 
 
-
-        for (int i = 0; i < 1; i++)
-        {
-
-            <div class="form-group">
-                <label class="control-label">
-                    @item.Bowler.Name
-                    @if (inHandi)
+        <div class="form-group">
+            <label class="control-label">
+                @item.Bowler.Name
+                @if (inHandi)
+                {
+                    if (item.Bowler.BowlerAverage.Handicap > 0)
                     {
-                        if (item.Bowler.BowlerAverage.Handicap > 0)
-                        {
-                            @:/ @item.Bowler.BowlerAverage.Handicap
-                         }
+                        @:/ @item.Bowler.BowlerAverage.Handicap
+                    }
 
-                     }
-
-
-                </label>
-                <input type="number" name="inputScores" value="@(!inHandi ? item.Score : (item.Score - item.Bowler.BowlerAverage.Handicap))" class="form-control" />
-                <span asp-validation-for="@item.Score" class="text-danger"></span>
-            </div>
-
-        }
-
+                }
+            </label>
+            @*점수입력 input, 핸디이력 input을 구분 사용, 점수input 만 전송*@
+            <input type="number" name="inputScores" value="@item.Score" class="form-control" />
+            <input type="hidden" name="inputHandi" value="@(!inHandi ? 0 :  item.Bowler.BowlerAverage.Handicap)" />
+            <span asp-validation-for="@item.Score" class="text-danger"></span>
+    
+        </div>
+    
     }
+        
+        </div>
     </div>
-    <div>
+     @*점수부분총괄 시작*@
+   
+    <div class="clearfix"></div>
+
+    <div class="text-right">
         <input type="submit" value="Save" class="btn btn-primary" />
         <a class="btn btn-danger" asp-action="Index" asp-route-id="@game.ID" asp-route-game="@(((SubGame)ViewData["subGame"]).Round)">Back to List</a>
     </div>
 
     </form>
-
-    
-
-
+</div>
 
 
     @section Scripts {
+
+        <script>
+
+            var changeVal = false;
+            
+            $(function () {
+
+                
+                $("input:radio[name='optWin']").filter('[value="@Context.Request.Query["winTeam"]"]').attr("checked", true);
+                
+                var nodes = $('div[name="teamContainer"]');
+
+                //alert(nodes.first().attr("style"));
+
+                nodes.each(function () {
+
+                    var tot = 0;
+                    var cnt = 0;
+
+                    var nums = $(this).children().find('input[type=number]');
+                    
+                    nums.each(function () {
+                        tot = tot + Number($(this).val());
+                        cnt++;
+
+                    });
+
+                    var node = $(this).children('.lbltotal');
+                    //alert(node.attr("class"));
+                    var radio = $(this).children('.optWin');
+                    //alert(radio.is(':checked'));
+
+                    if (radio.is(':checked')) {
+                        tot = tot - "@game.Penalty";
+                    }
+                    
+                    if ("@game.bCalTotal"=="True") {
+                        node.text(Math.round(tot));
+                    }
+                    else {
+                        node.text(Math.round(tot / cnt));
+                    }       
+                    //alert(tot);
+                });
+            
+
+            });
+
+            $(document).on("change", "input[name=inputScores]", function () {
+                   
+                changeVal = true;
+                var tot = 0;
+                var cnt = 0;
+                var nodes = $(this).parent().parent().children().find('input[type=number]');
+
+                    
+                $(this).val($(this).val()==0 ? 0 : Number($(this).val()) + Number($(this).next().val()));
+
+                //alert($(this).next().attr("type"));
+                //alert(nodes.first().attr("type"));
+
+                nodes.each(function () {
+                    tot = tot + Number($(this).val());
+                    cnt++;
+
+                });
+
+                //alert(cnt);
+                //alert(tot);
+
+                var node = $(this).parent().parent().children('.lbltotal');
+                //alert(node.attr("class"));
+                var radio = $(this).parent().parent().children('.optWin');
+                //alert(radio.is(':checked'));
+                    
+                if (radio.is(':checked')) {
+                    tot = tot - "@game.Penalty";
+                }
+
+                //alert(tot);
+
+                if ("@game.bCalTotal") {
+                    node.text(Math.round(tot));
+                }
+                else {
+                    node.text(Math.round(tot / cnt));
+                }
+                    
+
+            });
+
+
+            $(document).on("focus", "input[name=inputScores]", function () {
+
+                $(this).val(Number($(this).val()) - Number($(this).next().val()));
+                    
+                    
+            });
+
+
+            $(document).on("blur", "input[name=inputScores]", function () {
+
+                //이벤트 순서가 change 발생후 blur가 발생함
+                if (changeVal) {
+                    changeVal = false;
+                }
+                else {
+                    $(this).val(Number($(this).val()) + Number($(this).next().val()));
+                }
+                   
+            });
+
+            // 사용치 않음,  radio의 disabled 를 삭제한 후 사용하면 정상작동 됨되
+            $(document).on("change", "input[name=optWin]", function () {
+
+                
+                var nodes = $(this).parent().parent().children('div[name="teamContainer"]'); 
+                //alert(nodes.first().attr("style"));
+
+                nodes.each(function () {
+                    var tot = 0;
+                    var cnt = 0;
+
+                    var nums = $(this).children().find('input[type=number]');
+
+                    nums.each(function () {
+                        tot = tot + Number($(this).val());
+                        cnt++;
+
+                    });
+
+                    var node = $(this).children('.lbltotal');
+                    //alert(node.attr("class"));
+                    var radio = $(this).children('.optWin');
+                    //alert(radio.is(':checked'));
+
+                    if (radio.is(':checked')) {
+                        tot = tot - "@game.Penalty";
+                    }
+                     if ("@game.bCalTotal"=="True") {
+                        node.text(Math.round(tot));
+                    }
+                    else {
+                        node.text(Math.round(tot / cnt));
+
+                    }       
+                    //alert(tot);
+                });
+                    
+
+            });
+
+            
+        </script>
+
+
         @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     }

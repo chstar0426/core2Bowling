@@ -32,9 +32,12 @@ namespace core2Bowling.Models
         public GameKind GameKind { get; set; }
 
 
-        [StringLength(100)]
+        [StringLength(50)]
         [Display(Name = "간단설명")]
         public string GameContent { get; set; }
+
+        [Display(Name = "총점으로 계산")]  // 합계 계산, 비율계산
+        public bool bCalTotal { get; set; }
 
         [Display(Name = "우승팀 차감")]
         public int Penalty { get; set; }
@@ -50,7 +53,7 @@ namespace core2Bowling.Models
         [Display(Name = "핸디적용")]
         public bool bHandicap { get; set; }
 
-        [StringLength(4096)]
+        [StringLength(255)]
         [Display(Name = "경기메모")]
         public string GameMemo { get; set; }
 
