@@ -134,37 +134,37 @@
 
                 @:<div class="tab-pane @selectActive" id="tab_game_@round">
                     @:<table class="table table-bordered">
-                    
-                        //테이블 상단 총점 처리
-                        teamName = string.Empty;
 
-                        roundID = Model.Where(m => m.Team.SubGame.Round == round).First().Team.SubGameID;
+                    //테이블 상단 총점 처리
+                    teamName = string.Empty;
 
-                        var listScore = new List<int>();
+                    roundID = Model.Where(m => m.Team.SubGame.Round == round).First().Team.SubGameID;
 
-                        var TeamScore = Model.Where(m => m.Team.SubGameID == roundID).GroupBy(t => t.Team.TeamName);
-                        colcnt = TeamScore.Count();    /* 팀수*/
-                        colInc = colcnt; /*컬럼수 초기화 역활을 함, 라운더 처음에 팀수와 차이로 발생하는 빈 컬럼 예방*/
+                    var listScore = new List<int>();
+
+                    var TeamScore = Model.Where(m => m.Team.SubGameID == roundID).GroupBy(t => t.Team.TeamName);
+                    colcnt = TeamScore.Count();    /* 팀수*/
+                    colInc = colcnt; /*컬럼수 초기화 역활을 함, 라운더 처음에 팀수와 차이로 발생하는 빈 컬럼 예방*/
 
 
-                        foreach (var g in TeamScore)
+                    foreach (var g in TeamScore)
+                    {
+                        //g.Sum
+                        //int imsi = game.bCalTotal ? g.Sum(a => a.Score) : (int)Math.Round(g.Average(a => a.Score), MidpointRounding.AwayFromZero);
+                        int imsi = g.Sum(a => a.Score);
+
+                        if (g.Key == winwin)
                         {
-                            //g.Sum
-                            //int imsi = game.bCalTotal ? g.Sum(a => a.Score) : (int)Math.Round(g.Average(a => a.Score));
-                            int imsi = g.Sum(a => a.Score); 
+                            imsi -= penalty;
+                        }
 
-                            if (g.Key == winwin)
-                            {
-                                imsi -= penalty;
-                            }
+                        imsi = game.bCalTotal ? imsi : (int)Math.Round(imsi / (float)g.Count(), MidpointRounding.AwayFromZero);
 
-                            imsi = game.bCalTotal ? imsi : (int)Math.Round(imsi / (float)g.Count());
-                            
-                            listScore.Add(imsi);
+                        listScore.Add(imsi);
 
-                        };
+                    };
 
-                        int maxTeamScore = listScore.Max();
+                    int maxTeamScore = listScore.Max();
 
                         <tr>
                             @{
@@ -179,9 +179,9 @@
                                 int imsi=s.Sum(a => a.Score) - ((winPre == s.Key) ? penalty : 0);
 
                                 //g.Sum
-                                //int sScore = (game.bCalTotal ? s.Sum(a => a.Score) : (int)Math.Round(s.Average(a => a.Score))) - ((winPre == s.Key) ? penalty : 0);
-                                
-                                int sScore = game.bCalTotal ? imsi : (int)Math.Round(imsi / (float)s.Count());
+                                //int sScore = (game.bCalTotal ? s.Sum(a => a.Score) : (int)Math.Round(s.Average(a => a.Score), MidpointRounding.AwayFromZero) - ((winPre == s.Key) ? penalty : 0));
+
+                                int sScore = game.bCalTotal ? imsi : (int)Math.Round(imsi / (double)s.Count(), MidpointRounding.AwayFromZero);
 
 
 
@@ -261,35 +261,36 @@
 
                         teamSequence = item.Sequence;
                         @:<tr>
-                            colInc = 0;
+    colInc = 0;
 
-                        }
+}
 
-                        //해당 라인의 앞 공백
-                        for (int i = colInc; i < item.Team.TeamOrder; i++)
-                        {
-                            <td></td>
-                            <td></td>
-
-
-                        }
-
-                        colInc = item.Team.TeamOrder;
-
-                        <td class="@(handi > 0 ? "text-success":"")">
-                            @Html.DisplayFor(modelItem => item.Bowler.Name)
-                            (@Html.DisplayFor(modelItem => item.Average))
-                        </td>
-                        <td class="@styleScore">@item.Score</td>
-                        @*<td>@item.Sequence</td>*@
+//해당 라인의 앞 공백
+for (int i = colInc; i < item.Team.TeamOrder; i++)
+{
+    <td></td>
+    <td></td>
 
 
+}
+
+colInc = item.Team.TeamOrder;
+
+@*<td class="@(handi > 0 ? "text-success":"")">*@
+<td style="@(handi > 0 ? "color:#ff8c00" : "")">
+    @Html.DisplayFor(modelItem => item.Bowler.Name)
+    (@Html.DisplayFor(modelItem => item.Average))
+</td>
+<td class="@styleScore">@item.Score</td>
+@*<td>@item.Sequence</td>*@
 
 
-                        colInc++;
 
 
-                    }
+colInc++;
+
+
+}
 
             @*Round의 마지막 빈 컬럼*@
             @if (colInc < colcnt)

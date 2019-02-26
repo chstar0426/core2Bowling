@@ -102,6 +102,7 @@ namespace core2Bowling.Controllers
                 
                 var data = _context.TeamMembers
                     .Include(t => t.Bowler)
+                        .ThenInclude(t=>t.BowlerAverage)
                     .Include(t => t.Team)
                         .ThenInclude(s => s.SubGame)
                         .ThenInclude(s => s.Game)
@@ -112,6 +113,7 @@ namespace core2Bowling.Controllers
                          BowlerID = gt.Key,
                          monAvg = Convert.ToInt32(gt.Average(g => g.Score)),
                          Name = gt.First().Bowler.Name,
+                         Handicap=gt.First().Bowler.BowlerAverage.Handicap,
                          Period = gt.First().Team.SubGame.Game.GameContent,
                          GameID = item,
                          InActivity = gt.First().Bowler.InActivity // 여기에서는 의미가 없고 연간통계에 사용하기 위한 컬럼
@@ -136,6 +138,7 @@ namespace core2Bowling.Controllers
                 {
                     BowlerID = g.Key,
                     Name = g.First().Name,
+                    Handicap = g.First().Handicap, 
                     InActivity = g.First().InActivity,
                     beforeAvg = YearAvgs.Find(y => y.BowlerID == g.Key) == null ? 0 : YearAvgs.Find(y => y.BowlerID == g.Key).Average,
                     Games = g,
@@ -145,7 +148,7 @@ namespace core2Bowling.Controllers
 
 
             //3달동안 경기에 한번도 참여하지 못한 멤버 추가
-             var bowlers = _context.Bowlers.Where(t => t.Group == TeamGroup &&
+             var bowlers = _context.Bowlers.Include(b=>b.BowlerAverage).Where(t => t.Group == TeamGroup &&
                 ((t.RegisterDate <= DateTime.Parse(endDate) && t.LeaveDate >= DateTime.Parse(startDate)) || t.RegisterDate <= DateTime.Parse(endDate) && t.LeaveDate == null)
                 ).ToList();
 
@@ -160,6 +163,7 @@ namespace core2Bowling.Controllers
                 {
                     BowlerID = bw.BowlerID,
                     Name = bw.Name,
+                    Handicap = bw.BowlerAverage.Handicap,
                     beforeAvg = ye,
                     Games = null,
                     InActivity = bw.InActivity,
@@ -206,9 +210,10 @@ namespace core2Bowling.Controllers
                 cnt++;
             }
 
-
             var penaltyAvg = _context.BowlerAverages.Include(b => b.Bowler)
-                .Where (b => (b.Bowler.Group == hTeamGroup && b.Bowler.InActivity == false) || (b.Bowler.Group == hTeamGroup && (b.Bowler.LeaveDate >= DateTime.Parse(startDate) && b.Bowler.LeaveDate <= DateTime.Parse(hendDate))))
+                .Where(b => (b.Bowler.Group == hTeamGroup) &&
+                    (b.Bowler.InActivity == false && b.Bowler.RegisterDate <= DateTime.Parse(hendDate) ||
+                    (b.Bowler.InActivity == true && b.Bowler.LeaveDate >= DateTime.Parse(startDate))))
                 .OrderBy(b => b.BowlerID);
 
 
@@ -317,16 +322,18 @@ namespace core2Bowling.Controllers
 
                 var data = _context.TeamMembers
                     .Include(t => t.Bowler)
+                        .ThenInclude(t => t.BowlerAverage)
                     .Include(t => t.Team)
                         .ThenInclude(s => s.SubGame)
                         .ThenInclude(s => s.Game)
-                    .Where(t => t.Team.SubGame.GameID == item && t.Bowler.Group == TeamGroup )  //&& (t.Bowler.LeaveDate >= DateTime.Parse("2018-01-01") || t.Bowler.InActivity==false))
+                    .Where(t => t.Team.SubGame.GameID == item && t.Bowler.Group == TeamGroup)  //&& (t.Bowler.LeaveDate >= DateTime.Parse("2018-01-01") || t.Bowler.InActivity==false))
                     .GroupBy(t => t.BowlerID)
                      .Select(gt => new YearMonthAvg
                      {
                          BowlerID = gt.Key,
                          monAvg = Convert.ToInt32(gt.Average(g => g.Score)),
                          Name = gt.First().Bowler.Name,
+                         Handicap = gt.First().Bowler.BowlerAverage.Handicap,
                          Period = gt.First().Team.SubGame.Game.GameContent,
                          GameID = item,
                          InActivity=gt.First().Bowler.InActivity
@@ -339,7 +346,7 @@ namespace core2Bowling.Controllers
             }
 
             //1년동안 경기에 한번도 참여하지 못한 멤버 추가 
-            var bowlers = _context.Bowlers.Where(t => (t.Group == TeamGroup && t.InActivity == false) || (t.Group == TeamGroup && t.LeaveDate >= DateTime.Parse(startDate))).ToList();
+            var bowlers = _context.Bowlers.Include(b=>b.BowlerAverage).Where(t => (t.Group == TeamGroup && t.InActivity == false) || (t.Group == TeamGroup && t.LeaveDate >= DateTime.Parse(startDate))).ToList();
 
             var exceptBowlers = bowlers.Select(b => b.BowlerID).Except(games.Select(r => r.BowlerID).Distinct());
 
@@ -350,6 +357,7 @@ namespace core2Bowling.Controllers
                 {
                     BowlerID = bw.BowlerID,
                     Name = bw.Name,
+                    Handicap = bw.BowlerAverage.Handicap,
                     //beforeAvg = ,
                     //Games = ,
                     InActivity = bw.InActivity

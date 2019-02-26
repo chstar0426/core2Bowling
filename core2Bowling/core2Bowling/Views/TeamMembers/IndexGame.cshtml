@@ -219,11 +219,11 @@
                         }
 
                         <td>@total</td>
-                        <td>@Math.Round(total / Convert.ToDouble(perCnt)) @(fine==false?"": "(" + avg + ")")</td>
+                        <td>@Math.Round(total / Convert.ToDouble(perCnt), MidpointRounding.AwayFromZero) @(fine==false?"": "(" + avg + ")")</td>
 
                         if (fine)
                         {
-                            <td>@(Math.Round(total / Convert.ToDouble(perCnt)) - avg)</td>
+                            <td>@(Math.Round(total / Convert.ToDouble(perCnt), MidpointRounding.AwayFromZero) - avg)</td>
                             <td>@string.Format("{0:n0}", (pfine * 1000))</td>
                         }
 

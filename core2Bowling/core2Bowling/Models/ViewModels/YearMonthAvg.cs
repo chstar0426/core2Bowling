@@ -13,6 +13,8 @@ namespace core2Bowling.Models
 
         public string Name { get; set; }
 
+        public int Handicap { get; set; }
+
         public bool InActivity { get; set; }
 
         public int GameID { get; set; }

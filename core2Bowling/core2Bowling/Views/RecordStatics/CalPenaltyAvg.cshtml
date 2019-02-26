@@ -8,7 +8,7 @@
 }
 
 
-<h2>벌금에버갱신 &nbsp;&nbsp;<small><i class="glyphicon glyphicon-hand-right"></i> 3개월간의 자료로 에버를 갱신합니다.(6월 부터 기록)</small></h2>
+<h2>벌금에버갱신 &nbsp;&nbsp;<small><i class="glyphicon glyphicon-hand-right"></i> 3개월간의 자료로 에버를 갱신합니다.</small></h2>
 <hr />
 
 
@@ -103,7 +103,7 @@
 
                         <td>@orderNum.ToString() @*@(item.InActivity == true ? "탈퇴" : "orderNum.ToString()")*@</td>
                         <td>
-                            @item.Name
+                            <span style="@(item.Handicap > 0 ? "color:#ff8c00" : "")">@item.Name</span>
                             <input type="hidden" name="inputName" value="@item.BowlerID" />
                         </td>
                         <td>@item.beforeAvg</td>
@@ -174,10 +174,33 @@
                         }
                         <td style="@(item.InActivity ? "" : "background-color:aliceblue")">@string.Format("{0:n0}", (indiHap)) </td>
                         <td class="td-last" style="@(item.InActivity ? "" : "background-color:aliceblue")">
-                            @Math.Round(indiHap / Convert.ToDouble(lstContent.Count - emptyNum))
+
                             @{
+                                int orgAvg = indiHap==0 ? 0 : (int)(Math.Round(indiHap / Convert.ToDouble(lstContent.Count - emptyNum), MidpointRounding.AwayFromZero));
+
                                 //최하 점수 는 150으로 표기토록 함.
-                                int avgRegister = (int)(Math.Round(indiHap / Convert.ToDouble(lstContent.Count - emptyNum)));
+                                int avgRegister = orgAvg;
+                                styleScore = string.Empty;
+
+                                if (item.Handicap > 0)
+                                {
+                                    if (avgRegister >= 190)
+                                    {
+                                        avgRegister = 190;
+                                        styleScore = "text-danger";
+                                    }
+
+                                }
+                                else
+                                {
+                                    if (avgRegister >= 200)
+                                    {
+                                        avgRegister = 200;
+                                        styleScore = "text-danger";
+                                    }
+
+                                }
+
                                 if (avgRegister < 150)
                                 {
                                     avgRegister = 150;
@@ -188,13 +211,20 @@
                             @*관리자일때는 TextBox로 표시*@
                             @if (!User.IsInRole("General"))
                             {
+                                <span class="@styleScore">@orgAvg</span>
                                 <input type="text" name="inputAvg" style="width:40px;@(item.InActivity ? "background-color:#808080" : "")" value="@(item.InActivity ? 0:avgRegister)" />
                                 @*@item.Name @indiHap @lstContent.Count @emptyNum   --- 검산용*@
                             }
                             else
                             {
 
-                                <input type="hidden" name="inputAvg" style="width:40px;" value="@(item.InActivity ? 0:avgRegister)" />
+                                <span class="@styleScore">@orgAvg</span>
+                                @if (orgAvg != avgRegister)
+                                {
+                                    @:(@avgRegister.ToString())
+
+                                }
+          
                             }
 
                         </td>

@@ -8,7 +8,7 @@
 }
 
 
-<h2>에버갱신 &nbsp;&nbsp;<small><i class="glyphicon glyphicon glyphicon-hand-right"></i> 1년간의 자료로 에버를 갱신합니다.(6월 부터 기록)</small></h2>
+<h2>에버갱신 &nbsp;&nbsp;<small><i class="glyphicon glyphicon glyphicon-hand-right"></i> 1년간의 자료로 에버를 갱신합니다</small></h2>
 <hr />
 
 
@@ -106,9 +106,10 @@
 
                                 <td>@orderNum.ToString() @*@(item.InActivity == true ? "탈퇴" : orderNum.ToString())*@</td>
                                 <td>
-                                    @item.Name
-                                <input type="hidden" name="inputName" value="@item.BowlerID" />
-                            </td>
+
+                                    <span style="@(item.Handicap > 0 ? "color:#ff8c00" : "")">@item.Name</span>
+                                    <input type="hidden" name="inputName" value="@item.BowlerID" />
+                                </td>
 
                         }
 
@@ -177,20 +178,27 @@
 
                         <td style="@(groupBowler.First().InActivity ?"" : "background-color:aliceblue")">@string.Format("{0:n0}", indiHap) </td>
                         <td class="td-last" style="@(groupBowler.First().InActivity ?"" : "background-color:aliceblue")">
-                            @((lstContent.Count - emptyNum == 0) ? 0 : Math.Round(indiHap / Convert.ToDouble(lstContent.Count - emptyNum)))
+
+                            @{
+                                int imsiJumsu = (int)((lstContent.Count - emptyNum == 0) ? 0 : Math.Round(indiHap / Convert.ToDouble(lstContent.Count - emptyNum), MidpointRounding.AwayFromZero));
+
+                                if (imsiJumsu >= 200)
+                                {
+                                    styleScore = "text-danger";
+                                }
+
+                            }
+
+                            <span class="@styleScore">@imsiJumsu</span>
 
                             @*관리자일때는 TextBox로 표시*@
                             @if (!User.IsInRole("General"))
                             {
-                                <input type="text" name="inputAvg" style="width:40px;@(groupBowler.First().InActivity ? "background-color:#808080" : "")" value="@((groupBowler.First().InActivity ? -1 : 1 )*((lstContent.Count - emptyNum == 0) ? 1 : Math.Round(indiHap / Convert.ToDouble(lstContent.Count - emptyNum))))" />
+                                <input type="text" name="inputAvg" style="width:40px;@(groupBowler.First().InActivity ? "background-color:#808080" : "")" value="@((groupBowler.First().InActivity ? -1 : 1 ) * imsiJumsu)" />
                                 @*탈퇴 표시를 위해 탈퇴자는 음수(-)사용, 탈퇴 0점은 확인이 어려워 1점으로 표시*@
                                 @*@groupBowler.First().Name @indiHap @lstContent.Count @emptyNum*@
                             }
-                            else
-                            {
-
-                                <input type="hidden" name="inputAvg" style="width:40px;" value="@((groupBowler.First().InActivity ? -1 : 1 )*((lstContent.Count - emptyNum == 0) ? 1 : Math.Round(indiHap / Convert.ToDouble(lstContent.Count - emptyNum))))" />
-                            }
+                            
                         </td>
 
 

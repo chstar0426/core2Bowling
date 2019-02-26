@@ -76,15 +76,16 @@
 
         <div class="form-group">
             <label class="control-label">
-                @item.Bowler.Name
+                <span style="@(item.Bowler.BowlerAverage.Handicap > 0 ? "color:#ff8c00" : "")">@item.Bowler.Name
                 @if (inHandi)
                 {
                     if (item.Bowler.BowlerAverage.Handicap > 0)
                     {
-                        @:/ @item.Bowler.BowlerAverage.Handicap
+                    @:/ @item.Bowler.BowlerAverage.Handicap
                     }
 
                 }
+                </span>
             </label>
             @*점수입력 input, 핸디이력 input을 구분 사용, 점수input 만 전송*@
             <input type="number" name="inputScores" value="@item.Score" class="form-control" />
@@ -191,8 +192,8 @@
                 }
 
                 //alert(tot);
-
-                if ("@game.bCalTotal") {
+               
+                if ("@game.bCalTotal" == "True") {
                     node.text(Math.round(tot));
                 }
                 else {
@@ -250,7 +251,7 @@
                     if (radio.is(':checked')) {
                         tot = tot - "@game.Penalty";
                     }
-                     if ("@game.bCalTotal"=="True") {
+                    if ("@game.bCalTotal" == "True") {
                         node.text(Math.round(tot));
                     }
                     else {
