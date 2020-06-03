@@ -21,5 +21,9 @@ namespace core2Bowling.Models
 
         public float Total { get; set; }
 
+        public int HiNLow { get; set; }
+
+        public int InAttend { get; set; }
+
     }
 }

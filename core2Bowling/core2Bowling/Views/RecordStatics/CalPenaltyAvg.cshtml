@@ -176,7 +176,7 @@
                         <td class="td-last" style="@(item.InActivity ? "" : "background-color:aliceblue")">
 
                             @{
-                                int orgAvg = indiHap==0 ? 0 : (int)(Math.Round(indiHap / Convert.ToDouble(lstContent.Count - emptyNum), MidpointRounding.AwayFromZero));
+                                int orgAvg = indiHap == 0 ? 0 : (int)(Math.Round(indiHap / Convert.ToDouble(lstContent.Count - emptyNum), MidpointRounding.AwayFromZero));
 
                                 //최하 점수 는 150으로 표기토록 함.
                                 int avgRegister = orgAvg;
@@ -224,7 +224,7 @@
                                     @:(@avgRegister.ToString())
 
                                 }
-          
+
                             }
 
                         </td>
@@ -243,10 +243,13 @@
         {
             <div class="form-group">
                 <input type="submit" value="에버리지 산정" class="btn btn-default" />
-                <span class="text-danger">산정하기 전 NaN 확인</span>
             </div>
 
         }
+
+        <div class="text-danger">
+            순위 기준 : 평균(소수반올림) > 출석 > 무핸디 > 하이앤로
+        </div>
 
 
     </div>

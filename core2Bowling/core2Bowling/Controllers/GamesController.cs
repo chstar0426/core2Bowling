@@ -129,7 +129,7 @@ namespace core2Bowling.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Playtime,Place,GameKind,GameContent,bCalTotal,Penalty,Group,bFine, bHandicap, GameMemo")] Game game)
+        public async Task<IActionResult> Create([Bind("Playtime,Place,GameKind,GameContent,bCalTotal,Penalty,Group,bFine, bHandicap, bAward, GameMemo")] Game game)
         {
             try
             {
@@ -363,12 +363,23 @@ namespace core2Bowling.Controllers
 
             if (await TryUpdateModelAsync<Game>(game,"",
                 g=>g.Playtime, g=>g.Place, g=>g.GameKind, g => g.GameContent, g=>g.bCalTotal, g=>g.Penalty, 
-                g=>g.bFine, g=>g.bHandicap, g=>g.GameMemo))
+                g=>g.bFine, g=>g.bHandicap, g=>g.bAward, g=>g.GameMemo))
             {
 
                 try
                 {
+
+                    if (game.bAward == false)
+                    {
+                        var awardList = _context.Awdards.Where(a => a.GameID == id);
+                        if (awardList.Count() > 0)
+                        {
+                            _context.Awdards.RemoveRange(awardList);
+                        }
+
+                    }
                     await _context.SaveChangesAsync();
+                    
                     return RedirectToAction(nameof(Index), new { gameGroup = game.Group, gameKind = Convert.ToInt32(Request.Cookies["GameKind"]), cVal=true });
 
                 }
@@ -408,11 +419,20 @@ namespace core2Bowling.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            //subGame이 삭제되면 하위 모든 관계가 삭제됨
+            var delSubgame = _context.SubGames.Where(g => g.GameID == id);
+            _context.RemoveRange(delSubgame);
+
+            //Award 테이블 내용 삭제
+            var delAwards = _context.Awdards.Where(g => g.GameID == id);
+            _context.RemoveRange(delAwards);
+
             var game = await _context.Games.SingleOrDefaultAsync(m => m.ID == id);
             _context.Games.Remove(game);
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index), new { gameGroup = game.Group, cVal = true });
-
+            
         }
 
         private bool GameExists(int id)

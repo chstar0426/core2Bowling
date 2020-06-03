@@ -74,17 +74,17 @@
                 <label asp-for="Group" class="control-label"></label>
                 <select class="form-control" asp-for="Group">
                     @if (User.IsInRole("Admin"))
-            {
-                <option value="">--팀 선택--</option>
-                <option value="RedPin">RedPin</option>
-                <option value="Family">Family</option>
+                    {
+                        <option value="">--팀 선택--</option>
+                        <option value="RedPin">RedPin</option>
+                        <option value="Family">Family</option>
 
-    }
-    else
-    {
-        <option value="@User.FindFirst("UserGroup").Value">@User.FindFirst("UserGroup").Value</option>
+                    }
+                    else
+                    {
+                        <option value="@User.FindFirst("UserGroup").Value">@User.FindFirst("UserGroup").Value</option>
 
-}
+                    }
 
                 </select>
                 @*<input asp-for="Group" class="form-control" />*@
@@ -103,6 +103,14 @@
                 <div class="checkbox">
                     <label>
                         <input asp-for="bHandicap" /> @Html.DisplayNameFor(model => model.bHandicap)
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="checkbox">
+                    <label>
+                        <input asp-for="bAward" /> @Html.DisplayNameFor(model => model.bAward)
                     </label>
                 </div>
             </div>

@@ -53,6 +53,10 @@ namespace core2Bowling.Models
         [Display(Name = "핸디적용")]
         public bool bHandicap { get; set; }
 
+        [Display(Name = "시상")]
+        public bool bAward { get; set; }
+
+
         [StringLength(255)]
         [Display(Name = "경기메모")]
         public string GameMemo { get; set; }
@@ -60,6 +64,9 @@ namespace core2Bowling.Models
 
         public ICollection<SubGame> SubGames { get; set; }
 
-        
+        //추가
+        public ICollection<Award> Awards { get; set; }
+
+
     }
 }

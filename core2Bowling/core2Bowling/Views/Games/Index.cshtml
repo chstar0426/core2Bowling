@@ -140,9 +140,12 @@
             <th>
                 @Html.DisplayNameFor(model => model.bHandicap)
             </th>
+            <th>
+                @Html.DisplayNameFor(model => model.bAward)
+            </th>
             @*<th>
-                    @Html.DisplayNameFor(model => model.GameMemo)
-                </th>*@
+            @Html.DisplayNameFor(model => model.GameMemo)
+        </th>*@
             <th></th>
         </tr>
     </thead>
@@ -175,9 +178,12 @@
             <td>
                 @Html.DisplayFor(modelItem => item.bHandicap)
             </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.bAward)
+            </td>
             @*<td>
-                @Html.DisplayFor(modelItem => item.GameMemo)
-            </td>*@
+            @Html.DisplayFor(modelItem => item.GameMemo)
+        </td>*@
             <td class="td-last">
                 <a asp-controller="TeamMembers" asp-action="Index" asp-route-id="@item.ID" class="text-info pagingClick">경기상세</a>
                 @if (!User.IsInRole("General"))
@@ -188,9 +194,9 @@
 
                 }
 
-        @*<a asp-action="Details" asp-route-id="@item.ID">Details</a> |
-        <a asp-controller="TeamMembers" asp-action="IndexVertical" asp-route-id="@item.ID">경기설정2</a>
-        <a asp-controller="TeamMembers" asp-action="IndexGame" asp-route-id="@item.ID">경기설정3</a>*@
+                @*<a asp-action="Details" asp-route-id="@item.ID">Details</a> |
+            <a asp-controller="TeamMembers" asp-action="IndexVertical" asp-route-id="@item.ID">경기설정2</a>
+            <a asp-controller="TeamMembers" asp-action="IndexGame" asp-route-id="@item.ID">경기설정3</a>*@
             </td>
         </tr>
     }

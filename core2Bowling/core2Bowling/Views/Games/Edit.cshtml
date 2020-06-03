@@ -73,17 +73,17 @@
                 <label asp-for="Group" class="control-label"></label>
                 <select class="form-control" asp-for="Group">
                     @if (User.IsInRole("Admin"))
-            {
-                <option value="">--팀 선택--</option>
-                <option value="RedPin">RedPin</option>
-                <option value="Family">Family</option>
+                    {
+                        <option value="">--팀 선택--</option>
+                        <option value="RedPin">RedPin</option>
+                        <option value="Family">Family</option>
 
-    }
-    else
-    {
-        <option value="@User.FindFirst("UserGroup").Value">@User.FindFirst("UserGroup").Value</option>
+                    }
+                    else
+                    {
+                        <option value="@User.FindFirst("UserGroup").Value">@User.FindFirst("UserGroup").Value</option>
 
-}
+                    }
                 </select>
                 @*<input asp-for="Group" class="form-control" />*@
                 <span asp-validation-for="Group" class="text-danger"></span>
@@ -103,6 +103,20 @@
                     </label>
                 </div>
             </div>
+
+            @if (Model.ID > 174)
+            {
+                <div class="form-group">
+                    <div class="checkbox">
+                        <label>
+                            <input asp-for="bAward" /> @Html.DisplayNameFor(model => model.bAward)
+                        </label>
+                    </div>
+                </div>
+
+            }
+
+
             <div class="form-group">
                 <label asp-for="GameMemo" class="control-label"></label>
                 @*<input asp-for="GameMemo" class="form-control" />*@
@@ -111,7 +125,7 @@
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-default" />
-                <a asp-action="Index" asp-route-gameGroup="@Model.Group" asp-route-gameKind="@Convert.ToInt32(Context.Request.Cookies["GameKind"])" asp-route-cVal="true" class="btn btn-info" >Back to List</a>
+                <a asp-action="Index" asp-route-gameGroup="@Model.Group" asp-route-gameKind="@Convert.ToInt32(Context.Request.Cookies["GameKind"])" asp-route-cVal="true" class="btn btn-info">Back to List</a>
             </div>
         </form>
     </div>

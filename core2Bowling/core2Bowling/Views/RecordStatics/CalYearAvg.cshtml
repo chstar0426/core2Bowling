@@ -111,59 +111,59 @@
                                     <input type="hidden" name="inputName" value="@item.BowlerID" />
                                 </td>
 
-                        }
-
-                        var idx = item.Period == null ? lstPeriod.Count() : lstPeriod.IndexOf(item.Period);
-
-                        if (item.Period == null)
-                        {
-                            //1번도 경기에 참석하지 않았을때
-                            for (int i = contentNum; i < idx; i++)
-                            {
-                                <td style="@(groupBowler.First().InActivity ?"" : "background-color:#eff1ef")"></td>
-                                contentNum++;
-                                emptyNum++;
                             }
-                        }
-                        else
-                        {
-                            //경기에 참석한 경우
-                            if (contentNum != idx)
-                            {
 
+                            var idx = item.Period == null ? lstPeriod.Count() : lstPeriod.IndexOf(item.Period);
+
+                            if (item.Period == null)
+                            {
+                                //1번도 경기에 참석하지 않았을때
                                 for (int i = contentNum; i < idx; i++)
                                 {
                                     <td style="@(groupBowler.First().InActivity ?"" : "background-color:#eff1ef")"></td>
                                     contentNum++;
                                     emptyNum++;
                                 }
-
                             }
-
-                            if (item.monAvg > 199)
+                            else
                             {
-                                styleScore = "text-danger";
+                                //경기에 참석한 경우
+                                if (contentNum != idx)
+                                {
+
+                                    for (int i = contentNum; i < idx; i++)
+                                    {
+                                        <td style="@(groupBowler.First().InActivity ?"" : "background-color:#eff1ef")"></td>
+                                        contentNum++;
+                                        emptyNum++;
+                                    }
+
+                                }
+
+                                if (item.monAvg > 199)
+                                {
+                                    styleScore = "text-danger";
+                                }
+
+
+                                <td class="@styleScore">@item.monAvg</td>
+
+                                indiHap += item.monAvg;
+
+                                if (styleScore != string.Empty)
+                                {
+                                    styleScore = string.Empty;
+                                }
+
+
+                                contentNum++;
+
+
                             }
 
-
-                            <td class="@styleScore">@item.monAvg</td>
-
-                            indiHap += item.monAvg;
-
-                            if (styleScore != string.Empty)
-                            {
-                                styleScore = string.Empty;
-                            }
-
-
-                            contentNum++;
 
 
                         }
-
-
-
-                    }
 
                         @if (contentNum < lstContent.Count)
                         {
@@ -198,7 +198,7 @@
                                 @*탈퇴 표시를 위해 탈퇴자는 음수(-)사용, 탈퇴 0점은 확인이 어려워 1점으로 표시*@
                                 @*@groupBowler.First().Name @indiHap @lstContent.Count @emptyNum*@
                             }
-                            
+
                         </td>
 
 
@@ -215,9 +215,12 @@
         {
             <div class="form-group">
                 <input type="submit" value="에버산정" class="btn btn-default" />
-                <span class="text-danger">산정하기 전 NaN, 년도별 에버 관리 인원을 확인하세요</span>
             </div>
         }
+    </div>
+
+    <div class="text-danger">
+        순위 기준 : 평균(소수반올림) > 출석 > 무핸디 > 하이앤로
     </div>
 </form>
 

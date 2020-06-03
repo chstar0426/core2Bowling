@@ -16,7 +16,8 @@ namespace core2Bowling.Models
         public DbSet<Team> Teams { get; set; }
         public DbSet<TeamMember> TeamMembers { get; set; }
         public DbSet<YearAverage> YearAversges { get; set; }
-        
+        public DbSet<Award> Awdards { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Bowler>().ToTable("Bolwer");
@@ -26,6 +27,7 @@ namespace core2Bowling.Models
             modelBuilder.Entity<Team>().ToTable("Team");
             modelBuilder.Entity<TeamMember>().ToTable("TeamMember");
             modelBuilder.Entity<YearAverage>().ToTable("YearAverage");
+            modelBuilder.Entity<Award>().ToTable("Award");
 
         }
     }

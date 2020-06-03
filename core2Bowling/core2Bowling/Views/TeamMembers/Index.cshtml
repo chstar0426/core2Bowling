@@ -3,17 +3,29 @@
 @{
     ViewData["Title"] = "Index";
     var game = (Game)ViewData["Game"];
+    var award = (List<Award>)ViewData["Award"];
+
     int queryGame = Context.Request.Query["game"].ToString() == "" ? 1 : Convert.ToInt32(Context.Request.Query["game"]);
+
     int penalty = game.Penalty;  // 우승팀 차감점수
     bool fine = game.bFine; //벌금표시
 
-    
+
 }
 <h2>게임상세정보 &nbsp;&nbsp;<small><i class="glyphicon glyphicon glyphicon-hand-right"></i> 각 게임에 대한 상세 기록입니다</small></h2>
 <hr />
 <div class="panel panel-info">
     <div class="panel-heading">
-        <h3 class="panel-title">경기개요</h3>
+        <h3 class="panel-title pull-left">경기개요(총괄)</h3>
+        <div class="pull-right">
+            @if (!User.IsInRole("General"))
+            {
+                <a asp-action="CreateTeam" asp-route-id="@game.ID">새로운경기</a> @:|
+
+            }
+            <a asp-action="IndexGame" asp-route-id="@ViewContext.RouteData.Values["Id"]">개인결과</a>
+        </div>
+        <div class="clearfix"></div>
     </div>
     <div class="panel-body">
         <div class="text-danger  pull-left">@game.GameKind  @(string.IsNullOrEmpty(game.GameContent) ? "" : "(" + game.GameContent + ")") </div>
@@ -21,19 +33,42 @@
         &nbsp;&nbsp; | &nbsp;&nbsp;  @(game.bFine ? "벌금 있음" : "벌금 없음")
         &nbsp;&nbsp; | &nbsp;&nbsp;  @(game.bHandicap ? "핸디 적용" : "핸디 미적용")
         &nbsp;&nbsp; | &nbsp;&nbsp;  @(game.bCalTotal ? "총점 계산" : "평균계산") / @game.Penalty 감점
-        <div class="pull-right">
-            @if (!User.IsInRole("Member"))
-            {
-                <a asp-action="CreateTeam" asp-route-id="@game.ID">새로운경기</a> @:|
 
-            }
-            <a asp-action="IndexGame" asp-route-id="@ViewContext.RouteData.Values["Id"]">개인결과</a>
-        </div>
+        <br />
         @if (!string.IsNullOrEmpty(game.GameMemo))
         {
-            <br /><br />
-            @*<i class="glyphicon glyphicon glyphicon-arrow-right" style="padding-top:15px;"></i>*@ <pre><strong>@game.GameMemo</strong></pre>
+            <br />
+            @*<i class="glyphicon glyphicon glyphicon-arrow-right" style="padding-top:15px;"></i>*@
+            <pre><strong>@game.GameMemo</strong></pre>
         }
+        <br />
+        @{int acnt = 0;
+            if (award.Count() > 0)
+            {
+                <span class="text-danger"><strong>점수순위</strong> : </span>
+                foreach (var item in award)
+                {
+                    if (acnt == 2)
+                    {
+                        <span class="text-danger"><strong>에버순위</strong> : </span>
+                    }
+                    if (acnt == 4)
+                    {
+
+                        <span class="text-danger"><strong>하이점수</strong> : </span>
+                    }
+                    if (acnt == 6)
+                    {
+                        <span class="text-danger"><strong>행운상</strong> : </span>
+                    }
+                    <span>@item.Bowler.Name </span>
+                    acnt++;
+                }
+
+            }
+
+        }
+
 
     </div>
 </div>
@@ -105,16 +140,17 @@
                         }
 
                         @:</tr><tr>
-                            <td colspan="@(colcnt * 2)">
-                                @if (!User.IsInRole("Member"))
-                                {
-                                    <a asp-action="Edit" asp-route-id="@roundID" asp-route-winTeam="@winPre">점수입력</a> @:|
-                                    <a asp-action="EditTeam" asp-route-id="@roundID">팀수정</a> @:|
-                                    <a asp-action="NextTeam" asp-route-id="@roundID">다음경기</a> @:|
-                                    <a asp-action="DelTeam" asp-route-id="@roundID">게임삭제</a>
-                                }
-                                <div class="pull-right">@(fine == false ? "" : "에바벌금 : " + string.Format("{0:n0}", (downScoreCount * 1000)))</div>
-                            </td>
+                                   <td colspan="@(colcnt * 2)">
+                                       @if (!User.IsInRole("General"))
+                                       {
+                                           <a asp-action="Edit" asp-route-id="@roundID" asp-route-winTeam="@winPre">점수입력</a> @:|
+                                           <a asp-action="EditTeam" asp-route-id="@roundID">팀수정</a> @:|
+                                           <a asp-action="NextTeam" asp-route-id="@roundID" onclick="return confirm('게임을 추가 하시겠습니까?');">다음경기</a> @:|
+                                           <a asp-action="DelTeam" asp-route-id="@roundID" onclick="return confirm('게임을 삭제 하시겠습니까?');">게임삭제</a>
+
+                                       }
+                                       <div class="pull-right">@(fine == false ? "" : "에바벌금 : " + string.Format("{0:n0}", (downScoreCount * 1000)))</div>
+                                   </td>
                             @:</tr></table></div>
                             
 
@@ -311,12 +347,13 @@ colInc++;
             <td colspan="@(colcnt*2)">
                 @if (Model.Count() > 0)
                 {
-                    @if (!User.IsInRole("Member"))
+                    @if (!User.IsInRole("General"))
                     {
                         <a asp-action="Edit" asp-route-id="@roundID" asp-route-winTeam="@winPre">점수입력</a> @:|
                         <a asp-action="EditTeam" asp-route-id="@roundID">팀수정</a> @:|
-                        <a asp-action="NextTeam" asp-route-id="@roundID">다음경기</a> @:|
-                        <a asp-action="DelTeam" asp-route-id="@roundID">게임삭제</a>
+                        <a asp-action="NextTeam" asp-route-id="@roundID" onclick = "return confirm('게임을 추가 하시겠습니까?');" >다음경기</a> @:|
+                        <a asp-action="DelTeam" asp-route-id="@roundID" onclick = "return confirm('게임을 삭제 하시겠습니까?');" >게임삭제</a>
+                       
                     }
                     <div class="pull-right">@(fine == false ? "" : "에바벌금 : " + string.Format("{0:n0}", (downScoreCount * 1000)))</div>
                 }

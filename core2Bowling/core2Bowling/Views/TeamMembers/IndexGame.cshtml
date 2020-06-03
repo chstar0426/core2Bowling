@@ -5,18 +5,28 @@
     var game = (Game)ViewData["Game"];
     var teamMember = (IEnumerable<TeamMember>)ViewData["bowlingContext"];
 
+    string[] prevAward = (string[])ViewData["prevAward"];
+    var nowAward = (List<Award>)ViewData["nowAward"];
+
     var gameNum = game.SubGames.Max(s => s.Round);      //전체경기의 최대 Round
 
-    bool sortOrder = (Context.Request.Query["sortOrder"]=="preAvg"?true:false);
+    bool sortOrder = (Context.Request.Query["sortOrder"] == "preAvg" ? true : false);
 
     bool fine = game.bFine; //벌금표시
+
+    var listItem = (List<Bowler>)ViewData["slectList"];
+
 
 }
 <h2>경기결과 &nbsp;&nbsp;<small><i class="glyphicon glyphicon glyphicon-hand-right"></i> 경기결과에 대한 상세 기록입니다</small></h2>
 <hr />
 <div class="panel panel-info">
     <div class="panel-heading">
-        <h3 class="panel-title">경기개요</h3>
+        <h3 class="panel-title pull-left">경기개요 @(sortOrder ? "(에버순위 산정)" : "(총점순위 산정)")</h3>
+        <div class="pull-right">
+            <a asp-action="Index" asp-route-id="@ViewContext.RouteData.Values["Id"]">경기결과</a>
+        </div>
+        <div class="clearfix"></div>
     </div>
     <div class="panel-body">
         <div class="text-danger  pull-left">@game.GameKind  @(string.IsNullOrEmpty(game.GameContent) ? "" : "(" + game.GameContent + ")")</div>
@@ -24,14 +34,55 @@
         &nbsp;&nbsp; | &nbsp;&nbsp;  @(game.bFine ? "벌금 있음" : "벌금 없음")
         &nbsp;&nbsp; | &nbsp;&nbsp;  @(game.bHandicap ? "핸디 적용" : "핸디 미적용")
         &nbsp;&nbsp; | &nbsp;&nbsp;  @(game.bCalTotal ? "총점 계산" : "평균계산") / @game.Penalty 감점
-        <div class="pull-right">
-            <a asp-action="Index" asp-route-id="@ViewContext.RouteData.Values["Id"]">경기결과</a>
-        </div>
+        <br />
         @if (!string.IsNullOrEmpty(game.GameMemo))
-         {
-            <br /><br />
+        {
+            <br />
             @*<i class="glyphicon glyphicon glyphicon-arrow-right" style="padding-top:15px;"></i>*@ <pre><strong>@game.GameMemo</strong></pre>
         }
+        <br />
+        @*상단 요약 기록부분*@
+        @{
+            if (!sortOrder)
+            {
+                if (nowAward.Count() > 0)
+                {
+                    <span class="text-danger"><strong>점수순위</strong> : </span>
+                    @foreach (var item in nowAward)
+                    {
+                        <span>@item.Bowler.Name </span>
+
+                    }
+                }
+            }
+            else
+            {
+                if (nowAward.Count() > 0)
+                {
+                    int acnt = 0;
+                    <span class="text-danger"><strong>에버순위</strong> : </span>
+                    @foreach (var item in nowAward)
+                    {
+                        if (acnt == 2)
+                        {
+                            <span class="text-danger"><strong>하이점수</strong> : </span>
+                        }
+                        if (acnt == 4)
+                        {
+
+                            <span class="text-danger"><strong>행운상</strong> : </span>
+                        }
+
+                        <span>@item.Bowler.Name </span>
+                        acnt++;
+                    }
+
+                }
+
+            }
+
+        }
+
     </div>
 </div>
 
@@ -43,205 +94,249 @@
 
     <div class="col-md-@(sortOrder ? 9 : 12)">
 
-       <table class="table">
-        <thead>
-            <tr class="text-center">
-                <th>연번</th>
-                <th>팀</th>
-                <th>선수</th>
-                @for (int i = 0; i < gameNum; i++)
-                {
-                    <th>
-                        @(i + 1)  게임
-                    </th>
-                 }
-
-
-                <th>합계</th>
-                @{
-                    string avgStyle = "text-danger";
-                    string preAvgStyle = "";
-
-                    if (sortOrder)
-                    {
-                        avgStyle = "";
-                        preAvgStyle = "text-danger";
-                    }
-
-
-
-                    if (fine)
+        <table class="table">
+            <thead>
+                <tr class="text-center">
+                    <th>연번</th>
+                    <th>팀</th>
+                    <th>선수</th>
+                    @for (int i = 0; i < gameNum; i++)
                     {
                         <th>
-                            <a asp-action="IndexGame" asp-route-Id="@ViewContext.RouteData.Values["Id"]" class="@avgStyle">점수등수</a>
+                            @(i + 1)  게임
                         </th>
-                        <th>
-                            <a asp-action="IndexGame" asp-route-Id="@ViewContext.RouteData.Values["Id"]" asp-route-sortOrder="preAvg" class="@preAvgStyle">에버등수</a>
-                        </th>
-                        <th>벌금</th>
-
-                    }
-                    else
-                    {
-                        <th>평균</th>
-                    }
-
-                }
-
-            </tr>
-        </thead>
-        <tbody>
-            @{
-                int totalFine = 0;
-                int orderNum = 1;
-
-                string[] winBowler = new string [2];
-            }
-            @foreach (var item in Model)
-            {
-                int cnt = 1;        //라운드 체크 변수
-                int total = 0;
-                int perCnt = 1;    //개인 라운드 개수
-                int pfine = 0;
-
-
-                var team = item.SelectMany(s => s.Team.TeamName).Distinct();
-                var avg = item.First().Average;
-                var lastRound = item.Last().Team.SubGame.Round;   //현재 경기자의 마지막 Round
-
-                var handi = item.First().Bowler.BowlerAverage.Handicap;
-
-                string styleScore = "";
-
-                int imsiAvg = avg;
-
-                string strikeAvg = string.Empty;
-
-
-                if (avg == 0)
-                {
-                    strikeAvg = "style=text-decoration:line-through";
-                    //strikeText = "text-danger";
-                }
-
-                //평균 200이상은 200, 150이하는 150으로 계산
-                if (handi == 0 && avg > 199)
-                {
-                    imsiAvg = 200;
-                }
-                else if (handi == 15 && avg > 189)
-                {
-                    imsiAvg = 190;
-                }
-                else if (avg > 0 && avg < 150)
-                {
-                    imsiAvg = 150;
-                }
-
-
-                @:<tr @strikeAvg>
-                <td>@orderNum</td>
-
-                foreach (var bw in item)
-                {
-                   
-                    styleScore = string.Empty;
-                    if (bw.Score - imsiAvg < 0)
-                    {
-                        styleScore = (fine == false ? "" : "downScore");
-                        pfine++;
-                    }
-                    if (bw.Score > 199)
-                    {
-
-                        styleScore = "overScore";
                     }
 
 
-                    if (cnt == 1)
-                    {
+                    <th>합계</th>
+                    @{
+                        string avgStyle = "text-danger";
+                        string preAvgStyle = "";
 
-                        if (sortOrder && (orderNum == 1 || orderNum == 2))
+                        if (sortOrder)
                         {
-                            winBowler[orderNum - 1] = bw.BowlerID;
-                        }
-                        <td>
-                            @foreach (var t in team)
-                            {
-                                @(t + " ");
-                            }
-                        </td>
-                        <td class="@(handi > 0 ? "text-success" : "")">
-                            @Html.DisplayFor(modelItem => bw.Bowler.Name)
-                        </td>
-
-                    }
-
-                    if (bw.Team.SubGame.Round == cnt)
-                    {
-                        <td class="@styleScore">
-                            @Html.DisplayFor(modelItem => bw.Score)
-                        </td>
-
-                    }
-                    else
-                    {
-                        for (int i = cnt; i < bw.Team.SubGame.Round; i++)
-                        {
-                            <td>/</td>
-
-                            cnt++;
+                            avgStyle = "";
+                            preAvgStyle = "text-danger";
                         }
 
-                        <td class="@styleScore">
-                            @Html.DisplayFor(modelItem => bw.Score)
-                        </td>
 
-                    }
-
-
-
-
-                    cnt++;
-                    total += bw.Score;
-
-                    
-                    @*@if (cnt > gameNum || cnt > item.Count())*@
-                    @if (cnt > lastRound)
-                    {
-                        if (gameNum > item.Count())
-                        {
-                            for (int i = cnt - 1; i < gameNum; i++)
-                            {
-                                <td>/</td>
-                            }
-
-                        }
-
-                        <td>@total</td>
-                        <td>@Math.Round(total / Convert.ToDouble(perCnt), MidpointRounding.AwayFromZero) @(fine==false?"": "(" + avg + ")")</td>
 
                         if (fine)
                         {
-                            <td>@(Math.Round(total / Convert.ToDouble(perCnt), MidpointRounding.AwayFromZero) - avg)</td>
-                            <td>@string.Format("{0:n0}", (pfine * 1000))</td>
+                            <th>
+                                <a asp-action="IndexGame" asp-route-Id="@ViewContext.RouteData.Values["Id"]" class="@avgStyle">점수순위</a>
+                            </th>
+                            <th>
+                                <a asp-action="IndexGame" asp-route-Id="@ViewContext.RouteData.Values["Id"]" asp-route-sortOrder="preAvg" class="@preAvgStyle">에버순위</a>
+                            </th>
+                            <th>벌금</th>
+
+                        }
+                        else
+                        {
+                            <th>평균</th>
                         }
 
-                        @:</tr>
+                    }
+                    @*//추가*@
+                    <th>참고</th>
 
-                        totalFine = totalFine + pfine;
-                     }
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    int totalFine = 0;
+                    int orderNum = 1;
+
+                    string[] winBowler = new string[2];
+
+                    //추가
+                    string[] newName = new string[2];
+                    Dictionary<string, string> dic = new Dictionary<string, string>();
+                    int sung = 0;
+
+
+                }
+                @foreach (var item in Model)
+                {
+                    int cnt = 1;        //라운드 체크 변수
+                    int total = 0;
+                    int perCnt = 1;    //개인 라운드 개수
+                    int pfine = 0;
+
+
+                    var team = item.SelectMany(s => s.Team.TeamName).Distinct();
+                    var avg = item.First().Average;
+                    var lastRound = item.Last().Team.SubGame.Round;   //현재 경기자의 마지막 Round
+
+                    var handi = item.First().Bowler.BowlerAverage.Handicap;
+
+                    string styleScore = "";
+
+                    int imsiAvg = avg;
+
+                    string strikeAvg = string.Empty;
+
+
+                    if (avg == 0)
+                    {
+                        strikeAvg = "style=text-decoration:line-through";
+                        //strikeText = "text-danger";
+                    }
+
+                    //평균 200이상은 200, 150이하는 150으로 계산
+                    if (handi == 0 && avg > 199)
+                    {
+                        imsiAvg = 200;
+                    }
+                    else if (handi == 12 && avg > 189)
+                    {
+                        imsiAvg = 190;
+                    }
+                    else if (avg > 0 && avg < 150)
+                    {
+                        imsiAvg = 150;
+                    }
+
+
+                    @:<tr @strikeAvg>
+                        <td>@orderNum</td>
+
+                    foreach (var bw in item)
+                    {
+
+                        styleScore = string.Empty;
+                        if (bw.Score - imsiAvg < 0)
+                        {
+                            styleScore = (fine == false ? "" : "downScore");
+                            pfine++;
+                        }
+                        if (bw.Score > 199)
+                        {
+
+                            styleScore = "overScore";
+                        }
+
+
+                        if (cnt == 1)
+                        {
+
+                            if (sortOrder && (orderNum == 1 || orderNum == 2))
+                            {
+                                winBowler[orderNum - 1] = bw.BowlerID;
+                            }
+                                <td>
+                                    @foreach (var t in team)
+                                    {
+                                        @(t + " ");
+                                    }
+                                </td>
+                                <td class="@(handi > 0 ? "text-success" : "")">
+                                    @Html.DisplayFor(modelItem => bw.Bowler.Name) @Html.DisplayFor(modelItem => bw.Bowler.BowlerID)
+                                </td>
+
+                        }
+
+                        if (bw.Team.SubGame.Round == cnt)
+                        {
+                                <td class="@styleScore">
+                                    @Html.DisplayFor(modelItem => bw.Score)
+                                </td>
+
+                        }
+                        else
+                        {
+                            for (int i = cnt; i < bw.Team.SubGame.Round; i++)
+                            {
+                                    <td>/</td>
+
+                                cnt++;
+                            }
+
+                                <td class="@styleScore">
+                                    @Html.DisplayFor(modelItem => bw.Score)
+                                </td>
+
+                        }
+
+
+                        cnt++;
+                        total += bw.Score;
+
+
+                            @*@if (cnt > gameNum || cnt > item.Count())*@
+                            @if (cnt > lastRound)
+                            {
+                                if (gameNum > item.Count())
+                                {
+                                    for (int i = cnt - 1; i < gameNum; i++)
+                                    {
+                                        <td>/</td>
+                                    }
+
+                                }
+
+                                <td>@total</td>
+                                <td>@Math.Round(total / Convert.ToDouble(perCnt), MidpointRounding.AwayFromZero) @(fine == false ? "" : "(" + avg + ")")</td>
+
+                                if (fine)
+                                {
+                                    <td>@(Math.Round(total / Convert.ToDouble(perCnt), MidpointRounding.AwayFromZero) - avg)</td>
+                                    <td>@string.Format("{0:n0}", (pfine * 1000))</td>
+                                }
+
+
+                                //추가
+                                bool include = false;
+
+                                if (sortOrder == true)
+                                {
+                                    if (string.IsNullOrEmpty(strikeAvg) && Array.FindIndex(prevAward, i => i == bw.BowlerID) < 0)
+                                    {
+                                        include = true;
+                                    }
+                                }
+                                else
+                                {
+                                    if (string.IsNullOrEmpty(strikeAvg))
+                                    {
+                                        include = true;
+                                    }
+                                }
+
+                                if (include)
+                                {
+                                    if (sung < 2)
+                                    {
+                                        newName[sung] = bw.BowlerID;
+                                        dic.Add(bw.BowlerID, bw.Bowler.Name);
+                                    }
+                                    sung++;
+                                }
+
+
+                                <th>@(include ? "" : "제외" )</th>
+
+
+                            @:</tr>
+
+
+                                totalFine = totalFine + pfine;
+                            }
 
                         //위치 중요
                         perCnt++;
+                    }
+
+                    orderNum++;
+
                 }
-                orderNum++;
+                @{ if (string.IsNullOrEmpty(newName[0])) { dic.Add("1", ""); }
+                   if (string.IsNullOrEmpty(newName[1])) { dic.Add("2", ""); } }
+            </tbody>
+        </table>
 
-            }
-        </tbody>
-    </table>
     </div>
-
 
     <div class="@(sortOrder ? "col-md-3" : "visible-md")">
         <table class="table">
@@ -252,37 +347,141 @@
             </thead>
             <tbody>
                 @{int cntItem = 0;
-                foreach (var item in teamMember)
-                {
+                    var HapNames = new string[newName.Length + prevAward.Length];
+                    Array.Copy(prevAward, HapNames, prevAward.Length);
+                    Array.Copy(newName, 0, HapNames, prevAward.Length, newName.Length);
 
-                    cntItem++;
-                    string classText = (item.Bowler.BowlerAverage.Handicap > 0) ? "text-success" : "";
-                    string strikeText = string.Empty;
+                    newName = new string[2];
+                    //dic.Clear();
 
-
-                    if (item.BowlerID == winBowler[0] || item.BowlerID == winBowler[1])
+                    foreach (var item in teamMember)
                     {
-                        strikeText = "style=text-decoration:line-through";
-                        //strikeText = "text-danger";
-                    }
 
-                    <tr>
-                        <td class="@classText" @strikeText>
-                            @cntItem. @item.Bowler.Name  @string.Format("{0:000}", item.Score)  (@item.Team.SubGame.Round G)
-                        </td>
-                    </tr>
+                        cntItem++;
+                        string classText = (item.Bowler.BowlerAverage.Handicap > 0) ? "text-success" : "";
+                        string strikeText = string.Empty;
 
 
-            }
-                }
+                        //if (item.BowlerID == winBowler[0] || item.BowlerID == winBowler[1])
+                        //{
+                        //    strikeText = "style=text-decoration:line-through";
+                        //}
+
+
+                        if (item.Average > 0)  //신임회원이 아님
+                        {
+                            //남자 하이
+                            if (string.IsNullOrEmpty(newName[0]))
+                            {
+                                if (Array.FindIndex(HapNames, i => i == item.BowlerID) < 0 && string.IsNullOrEmpty(classText)) //남자
+                                {
+                                    newName[0] = item.BowlerID;
+                                    dic.Add(item.BowlerID, item.Bowler.Name);
+                                }
+
+                            }
+                            //여자 하이
+                            if (string.IsNullOrEmpty(newName[1]))
+                            {
+                                if (Array.FindIndex(HapNames, i => i == item.BowlerID) < 0 && !string.IsNullOrEmpty(classText)) //여자
+                                {
+                                    newName[1] = item.BowlerID;
+                                    dic.Add(item.BowlerID, item.Bowler.Name);
+                                }
+                            }
+                        }
+
+                        <tr>
+                            <td class="@classText" @strikeText>
+                                @cntItem. @item.Bowler.Name  @string.Format("{0:000}", item.Score)  (@item.Team.SubGame.Round G)
+                            </td>
+                        </tr>
+
+
+                        }
+                        //로직상 해당하는 사람을 못찾은 경우 칸수 확보
+                        if (string.IsNullOrEmpty(newName[0])) { dic.Add("3", "");}
+                        if (string.IsNullOrEmpty(newName[1])) { dic.Add("4", "");}
+                        dic.Add("5", "");
+                        }
             </tbody>
 
         </table>
-
-
     </div>
 </div>
-   
 
-@(fine==false ? "" : "벌금 : " + string.Format("{0:n0}", (totalFine * 1000)))
+@if (game.bAward==true)
+{
+    <div class="panel panel-info">
+    <div class="panel-body">
+@if (prevAward[0] != "" && prevAward[3] != "")
+                    {
+                        int i = 0;
+                        @if (!sortOrder)
+    {
+        <div class="row">
+            <form asp-action="JumsuAward">
+                <input type="hidden" id="Id" name="Id" value="@ViewContext.RouteData.Values["Id"]" />
+                <div class="col-sm-2"><span class="text-primary text-right">점수순위 : </span></div>
+                @foreach (var item in dic)
+                    {
+                        if (i < 2)
+                        {
+                        <div class="col-sm-4"><select class="form-control" name="JumsuPar" id="JumsuPar" asp-items='new SelectList(listItem,"BowlerID","Name",
+                            (nowAward.Count==0?item.Key: nowAward[i].BowlerID) )'></select></div>
+                        @*<span>@(nowAward.Count==0 ? item.Value : nowAward[i].Bowler.Name )</span>
+                    <input type="text" name="JumsuPar" value="@(nowAward.Count==0?item.Key: nowAward[i].BowlerID )" />*@
+
+                    }
+
+                    i++;
+                }
+
+
+                <div class="col-sm-2"><button type="submit" class="btn btn-sm btn-primary form-control">저장</button></div>
+            </form>
+        </div>
+    }
+    else
+    {
+        <form asp-action="AvgAward">
+            <input type="hidden" id="Id" name="Id" value="@ViewContext.RouteData.Values["Id"]" />
+            <div class="row" style="margin-bottom : 10px">
+            <div class="col-sm-2"><span class="text-primary text-right">에버순위 : </span></div>
+            @foreach (var item in dic)
+            {
+                if (i == 2)
+                {
+
+                    @:</div><div class="row" style="margin-bottom : 10px"><div class="col-sm-2"><span class="text-primary text-right">하이점수 : </span></div>
+                }
+                else if (i == 4)
+                {
+                    @:</div><div class="row" style="margin-bottom : 10px"><div class="col-sm-2"><span class="text-primary text-right">행운상 : </span></div> 
+
+                }
+                <div class="col-sm-4"><select class="form-control" name="JumsuPar" id="JumsuPar" asp-items='new SelectList(listItem,"BowlerID","Name",
+                            (nowAward.Count==0?item.Key: nowAward[i].BowlerID ) )'></select></div>
+                @*<span>@((nowAward.Count == 0) ? item.Value : nowAward[i].Bowler.Name??"" )</span>
+            <input type="text" name="JumsuPar" value="@((nowAward.Count==0 )?item.Key: nowAward[i].BowlerID??"" )" />*@
+
+                i++;
+
+            }
+             <div class="col-sm-4"><button type="submit" class="btn btn-sm btn-primary form-control">저장</button></div>
+            </div>
+        </form>
+
+    }
+
+}
+<br />
+    <span class="text-danger">@(fine == false ? "" : "벌금 : " + string.Format("{0:n0}", (totalFine * 1000)))</span>
+    @*<a asp-controller="Games" asp-action="Index" asp-route-gameGroup="@game.Group"  asp-route-gameKind="@Convert.ToInt32(Context.Request.Cookies["GameKind"])" 
+    asp-route-cVal="true" class="btn btn-danger pull-right">Back to List</a>*@
+    </div>
+</div>
+
+}
+
 

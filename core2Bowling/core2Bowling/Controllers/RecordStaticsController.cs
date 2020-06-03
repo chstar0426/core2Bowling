@@ -36,7 +36,7 @@ namespace core2Bowling.Controllers
                 {
                     TeamGroup = group;
                 }
-               
+
             }
 
             if (group != "All" && group != TeamGroup)
@@ -66,7 +66,7 @@ namespace core2Bowling.Controllers
                 string lastday = DateTime.DaysInMonth(int.Parse(yymm[0]), int.Parse(yymm[1])).ToString();
 
                 endDate = DateTime.Now.ToString("yyyy-MM") + "-" + lastday + " 23:59";
-                
+
             }
             else
             {
@@ -83,26 +83,26 @@ namespace core2Bowling.Controllers
                  .OrderBy(g => g.Playtime);
 
             ViewData["GameContents"] = gameList.Select(g => new GameTitle {
-                GameID= g.ID,
-                GameContent= g.GameContent
+                GameID = g.ID,
+                GameContent = g.GameContent
             }).ToList();   //게임 7-1, 8-1 등  표시
 
             List<int> gameIds = gameList.Select(g => g.ID).ToList();  // 게임 Id만 가저욤
 
 
-            
+
             int gameCnt = gameIds.Count;  // 게임수
 
 
             //게임 ID에 대해 볼러별로 그루화 하여 에버리지를 구함
             var games = new List<YearMonthAvg>();
-            
+
             foreach (var item in gameIds)
             {
-                
+
                 var data = _context.TeamMembers
                     .Include(t => t.Bowler)
-                        .ThenInclude(t=>t.BowlerAverage)
+                        .ThenInclude(t => t.BowlerAverage)
                     .Include(t => t.Team)
                         .ThenInclude(s => s.SubGame)
                         .ThenInclude(s => s.Game)
@@ -113,7 +113,7 @@ namespace core2Bowling.Controllers
                          BowlerID = gt.Key,
                          monAvg = Convert.ToInt32(gt.Average(g => g.Score)),
                          Name = gt.First().Bowler.Name,
-                         Handicap=gt.First().Bowler.BowlerAverage.Handicap,
+                         Handicap = gt.First().Bowler.BowlerAverage.Handicap,
                          Period = gt.First().Team.SubGame.Game.GameContent,
                          GameID = item,
                          InActivity = gt.First().Bowler.InActivity // 여기에서는 의미가 없고 연간통계에 사용하기 위한 컬럼
@@ -124,12 +124,12 @@ namespace core2Bowling.Controllers
 
 
             }
-            
+
 
             //이전해 성적
             var YearAvgs = _context.YearAversges.Include(y => y.Bowler)
                 .Where(y => y.Year == (int.Parse(endDate.ToString().Substring(0, 4)) - 1).ToString()
-                && y.Bowler.Group == TeamGroup).OrderBy(y=>y.BowlerID).ToList();
+                && y.Bowler.Group == TeamGroup).OrderBy(y => y.BowlerID).ToList();
 
 
             //에버리지 순위 대로 소트하기위해 Group화 (다시 볼러ID로 그룹화)
@@ -138,12 +138,15 @@ namespace core2Bowling.Controllers
                 {
                     BowlerID = g.Key,
                     Name = g.First().Name,
-                    Handicap = g.First().Handicap, 
+                    Handicap = g.First().Handicap,
                     InActivity = g.First().InActivity,
                     beforeAvg = YearAvgs.Find(y => y.BowlerID == g.Key) == null ? 0 : YearAvgs.Find(y => y.BowlerID == g.Key).Average,
                     Games = g,
                     Total = (g.Sum(a => a.monAvg) + (gameIds.Count() > g.Count() ? (YearAvgs.Find(y => y.BowlerID == g.Key) == null ? 0 : YearAvgs.Find(y => y.BowlerID == g.Key).Average) * (gameIds.Count() - g.Count()) : 0))
-                        / (YearAvgs.Find(y => y.BowlerID == g.Key) == null ? Convert.ToSingle(g.Count()) : Convert.ToSingle(gameIds.Count())) //괄호( ) 위치 주의
+                        / (YearAvgs.Find(y => y.BowlerID == g.Key) == null ? Convert.ToSingle(g.Count()) : Convert.ToSingle(gameIds.Count())), //괄호( ) 위치 주의
+                    InAttend = gameIds.Count() - g.Count(),
+                    HiNLow = g.Max(a => a.monAvg) - g.Min(a => a.monAvg)
+
                 }).ToList();
 
 
@@ -167,14 +170,20 @@ namespace core2Bowling.Controllers
                     beforeAvg = ye,
                     Games = null,
                     InActivity = bw.InActivity,
-                    Total = ye
+                    Total = ye,
+                    InAttend = gameIds.Count(),
+                    HiNLow = 10000   //불참 벌점을 많이 줌
                 });
 
             }
 
 
             //소트 하여 반환 (탈퇴자를 아래로 몰아서 관리)
-            return View(returnGames.OrderBy(g => g.InActivity).ThenByDescending(g => g.Total));
+            return View(returnGames.OrderBy(g => g.InActivity)  // 탈퇴자 제일 하위
+                .ThenByDescending(g => g.Total)  // 평균점수로 소트
+                .ThenBy(g=>g.InAttend)    // 출석자 우선
+                .ThenBy(g => g.Handicap)  // 무핸디 우선
+                .ThenBy(g => g.HiNLow)); //하이로우
 
             //return View(returnGames.OrderByDescending(g => g.Total));
 
@@ -369,7 +378,12 @@ namespace core2Bowling.Controllers
             
             //그룹화 새로 조정
             //에버리지 순위 대로 소티(탈퇴자를 아래로 몰아서 관리)
-            var groupGames = games.GroupBy(t => t.BowlerID).OrderBy(g=>g.First().InActivity).ThenByDescending(g => g.Average(t => t.monAvg));
+            var groupGames = games.GroupBy(t => t.BowlerID)
+                .OrderBy(g=>g.First().InActivity)
+                .ThenByDescending(g => g.Average(t => t.monAvg))
+                .ThenByDescending(g=>g.Count())
+                .ThenBy(g=>g.First().Handicap)
+                .ThenBy(g=>g.Max(t=>t.monAvg) - g.Min(t=>t.monAvg));
 
             //var groupGames = games.GroupBy(t => t.BowlerID).OrderByDescending(g => g.Average(t => t.monAvg));
 

@@ -43,7 +43,6 @@ namespace core2Bowling.Controllers
                 .AsNoTracking();
 
             ViewData["Game"] = _context.Games.Include(g=>g.SubGames).Where(g => g.ID == id).SingleOrDefault();
-            
             return View(await bowlingContext.ToListAsync());
 
         }
@@ -71,7 +70,10 @@ namespace core2Bowling.Controllers
                 .AsNoTracking();
             
             ViewData["Game"] = _context.Games.Include(g => g.SubGames).Where(g => g.ID == id).SingleOrDefault();
-            
+            ViewData["Award"] = _context.Awdards.Include(a => a.Bowler)
+                                    .Where(a => a.GameID == id)
+                                    .OrderBy(a=>a.AwardKind).ToList();
+
             return View(await bowlingContext.ToListAsync());
 
         }
@@ -121,11 +123,15 @@ namespace core2Bowling.Controllers
             {
                 case "preAvg":
                    returnValue = bowlingContext.OrderBy(t => t.Team.SubGame.Round).GroupBy(t => t.BowlerID)
-                        .OrderByDescending(g => g.Average(a => a.Score) - (g.FirstOrDefault().Average));
+                        .OrderByDescending(g => g.Average(a => a.Score) - (g.FirstOrDefault().Average))
+                        .ThenBy(g => g.First().Bowler.BowlerAverage.Handicap) 
+                        .ThenBy(g => g.Max(a => a.Score) - g.Min(a => a.Score)); 
                     break;
                 default:
                     returnValue = bowlingContext.OrderBy(t => t.Team.SubGame.Round).GroupBy(t => t.BowlerID)
-                        .OrderByDescending(g => g.Average(a => a.Score));
+                        .OrderByDescending(g => g.Average(a => a.Score))    //동점처리 1. 총점
+                        .ThenBy(g => g.First().Bowler.BowlerAverage.Handicap) //2.무핸디
+                        .ThenBy(g => g.Max(a => a.Score) - g.Min(a => a.Score)); //하이로우
                     break;
             }
 
@@ -156,12 +162,35 @@ namespace core2Bowling.Controllers
 
 
             ViewData["Game"] = game;
+            ViewData["bowlingContext"] = bowlingContext.OrderByDescending(t => t.Score).Take(15);
 
-            ViewData["bowlingContext"] = bowlingContext.OrderByDescending(t => t.Score).Take(10);
+
+
+            //Award 부분
+            var maxGameID = (id > 174) ? _context.Awdards.Where(a=>a.GameID < id).Max(a=>a.GameID):0;
             
+            List<Award> AwardList = null;
+
+            switch (sortOrder)
+            {
+                case "preAvg":
+                    AwardList = _context.Awdards.Include(a => a.Bowler).Where(a => a.GameID == id && a.AwardKind > (AwardKind)1).ToList();
+                    
+                    break;
+                default:
+                    AwardList = _context.Awdards.Include(a => a.Bowler).Where(a => a.GameID == id && a.AwardKind < (AwardKind)2).ToList();
+                    break;
+            }
+
+            ViewData["prevAward"] = _context.Awdards.Where(a=> (int)a.AwardKind>1 && a.GameID==maxGameID).Select(a=>a.BowlerID).ToArray();
+            ViewData["nowAward"] = AwardList;
+
+
+            ViewData["slectList"] = await _context.Bowlers
+                            .Where(b=>(b.Group == game.Group || b.BowlerID=="00000")&& b.InActivity == false)
+                            .OrderBy(b=>b.Name).ToListAsync();
             //return View(await bowlingContext.ToListAsync());
             return View(returnValue);
-          
         }
 
         // GET: TeamMembers/Details/5
@@ -779,6 +808,86 @@ namespace core2Bowling.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> JumsuAward (int Id, string[] JumsuPar)
+        {
+            var awardObj = _context.Awdards.Where(a=> a.GameID == Id && a.AwardKind < (AwardKind)2).ToList();
+
+            if (awardObj.Count == 0)
+            {
+                List<Award> listAward = new List<Award>();
+                for (int i = 0; i < JumsuPar.Length; i++)
+                {
+                    listAward.Add(new Award()
+                    {
+                        AwardKind = (AwardKind)i,
+                        GameID = Id,
+                        BowlerID = JumsuPar[i]
+                    });
+
+                }
+               
+                await _context.AddRangeAsync(listAward);
+                
+
+            }
+            else
+            {
+
+                for (int i = 0; i < JumsuPar.Length; i++)
+                {
+                    awardObj[i].BowlerID = JumsuPar[i];
+                    
+                }
+
+                _context.UpdateRange(awardObj);
+            }
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(IndexGame), new { id = Id });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AvgAward(int Id, string[] JumsuPar)
+        {
+            var awardObj = _context.Awdards.Where(a => a.GameID == Id && a.AwardKind > (AwardKind)1).ToList();
+
+            if (awardObj.Count == 0)
+            {
+                List<Award> listAward = new List<Award>();
+                for (int i = 0; i < JumsuPar.Length; i++)
+                {
+                    listAward.Add(new Award()
+                    {
+                        AwardKind = (AwardKind)(i+2), //AwardKind 2~6
+                        GameID = Id,
+                        BowlerID = JumsuPar[i]
+                    });
+
+                }
+
+                await _context.AddRangeAsync(listAward);
+
+
+            }
+            else
+            {
+
+                for (int i = 0; i < JumsuPar.Length; i++)
+                {
+                    awardObj[i].BowlerID = JumsuPar[i];
+
+                }
+
+                _context.UpdateRange(awardObj);
+            }
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(IndexGame), new { id = Id, sortOrder = "preAvg" });
+        }
+
+
+
     }
 }
