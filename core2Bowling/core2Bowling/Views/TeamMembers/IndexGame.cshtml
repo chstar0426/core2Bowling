@@ -338,6 +338,7 @@
 
     </div>
 
+
     <div class="@(sortOrder ? "col-md-3" : "visible-md")">
         <table class="table">
             <thead>
@@ -356,7 +357,7 @@
 
                     foreach (var item in teamMember)
                     {
-
+                        bool include = false;
                         cntItem++;
                         string classText = (item.Bowler.BowlerAverage.Handicap > 0) ? "text-success" : "";
                         string strikeText = string.Empty;
@@ -377,8 +378,8 @@
                                 {
                                     newName[0] = item.BowlerID;
                                     dic.Add(item.BowlerID, item.Bowler.Name);
+                                    include = true;
                                 }
-
                             }
                             //여자 하이
                             if (string.IsNullOrEmpty(newName[1]))
@@ -387,6 +388,7 @@
                                 {
                                     newName[1] = item.BowlerID;
                                     dic.Add(item.BowlerID, item.Bowler.Name);
+                                    include = true;
                                 }
                             }
                         }
@@ -394,16 +396,23 @@
                         <tr>
                             <td class="@classText" @strikeText>
                                 @cntItem. @item.Bowler.Name  @string.Format("{0:000}", item.Score)  (@item.Team.SubGame.Round G)
+                                @if (include)
+                                {
+                                    @:<span class="badge badge-important">High</span> 
+                                }
                             </td>
                         </tr>
 
-
+                            if (!string.IsNullOrEmpty(newName[0]) && !string.IsNullOrEmpty(newName[1]))
+                            {
+                                break;
+                            }
                         }
                         //로직상 해당하는 사람을 못찾은 경우 칸수 확보
                         if (string.IsNullOrEmpty(newName[0])) { dic.Add("3", "");}
                         if (string.IsNullOrEmpty(newName[1])) { dic.Add("4", "");}
                         dic.Add("5", "");
-                        }
+                    }
             </tbody>
 
         </table>
@@ -411,7 +420,7 @@
 </div>
 
 @if (game.bAward==true)
-{
+                    {
     <div class="panel panel-info">
     <div class="panel-body">
 @if (prevAward[0] != "" && prevAward[3] != "")

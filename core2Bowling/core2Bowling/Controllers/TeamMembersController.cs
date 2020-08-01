@@ -162,7 +162,7 @@ namespace core2Bowling.Controllers
 
 
             ViewData["Game"] = game;
-            ViewData["bowlingContext"] = bowlingContext.OrderByDescending(t => t.Score).Take(15);
+            ViewData["bowlingContext"] = bowlingContext.OrderByDescending(t => t.Score);
 
 
 
