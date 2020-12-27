@@ -355,7 +355,10 @@ namespace core2Bowling.Controllers
             }
 
             //1년동안 경기에 한번도 참여하지 못한 멤버 추가 
-            var bowlers = _context.Bowlers.Include(b=>b.BowlerAverage).Where(t => (t.Group == TeamGroup && t.InActivity == false) || (t.Group == TeamGroup && t.LeaveDate >= DateTime.Parse(startDate))).ToList();
+            //var bowlers = _context.Bowlers.Include(b=>b.BowlerAverage).Where(t => (t.Group == TeamGroup && t.InActivity == false) 
+            //        || (t.Group == TeamGroup && t.LeaveDate >= DateTime.Parse(startDate))).ToList();
+            var bowlers = _context.Bowlers.Include(b => b.BowlerAverage).Where(t => (t.Group == TeamGroup
+                      && t.RegisterDate < DateTime.Parse(endDate) && (t.LeaveDate >= DateTime.Parse(startDate) || string.IsNullOrEmpty(t.LeaveDate.ToString())))).ToList();
 
             var exceptBowlers = bowlers.Select(b => b.BowlerID).Except(games.Select(r => r.BowlerID).Distinct());
 
@@ -404,7 +407,7 @@ namespace core2Bowling.Controllers
             var listYearAverages = new List<YearAverage>();
             
 
-            //들어온 자료를 list에 채워 넣음
+            //Form으로 전달된 자료를 list에 채워 넣음 
             //탈퇴 표시를 위해 탈퇴자는 음수(-)사용, 탈퇴 0점은 확인이 어려워 1점으로 표시
             foreach (var item in inputName)
             {
@@ -427,44 +430,49 @@ namespace core2Bowling.Controllers
             //기존 자료 불러오옴 (기존자료 가 있으면 업데이트, 없으면 insert
             var yearBowlers = _context.YearAversges.Include(y => y.Bowler)
                .Where(y => y.Bowler.Group == hTeamGroup && y.Year == hthisYear)
-               .OrderBy(y => y.BowlerID);
+               .OrderBy(y => y.BowlerID).ToList();
 
             
             if (yearBowlers.Count() > 0)
             {
-
-                // 업데이트 하기
-                //중요   listYearAverages와 tlist의 개수가 같아야 함 ...
-                var tlist = listYearAverages.OrderBy(y => y.BowlerID).ToList();
+                //정렬 필요가 없을 것 같음
+                //listYearAverages = listYearAverages.OrderBy(y => y.BowlerID).ToList();
                 int i = 0;
 
-
-                foreach (var item in yearBowlers)
+                foreach (var item in listYearAverages)
                 {
-                    //var tlist = listYearAverages.Find(y => y.BowlerID == item.BowlerID);
-
-                    //BollerID로 정열하여 순서대로 비교
-                    if (item.BowlerID == tlist[i].BowlerID)
+                    //YearAverages에 자료가 있는지 찾음
+                    var yb = yearBowlers.FirstOrDefault(y => y.BowlerID == item.BowlerID);
+                    
+                    if (yb == null)
                     {
-                        if (item.Average != tlist[i].Average || item.Bigo != tlist[i].Bigo)
+                        //없으면, insert, 새로추가
+                        _context.YearAversges.Add(new YearAverage
                         {
-                            item.Average = tlist[i].Average;
-                            item.Bigo = tlist[i].Bigo;
-                        }
-
+                            Average = item.Average,
+                            BowlerID = item.BowlerID,
+                            Bigo = item.Bigo,
+                            Year= item.Year
+                        });
                     }
                     else
                     {
-                        //순서대로 읽어 들이는데, 아이디가 맞지 않다면 오류
-                        return NotFound();
+                        //있으면, update
+                        if (item.Average != yb.Average || item.Bigo != yb.Bigo)
+                        {
+                            yb.Average = item.Average;
+                            yb.Bigo = item.Bigo;
+                        }
                     }
-                    
+                     
+
                     i++;
                 }
+                
             }
             else
             {
-                //insert 하기
+                //한번도 입력된적이 없으면 일괄 입력 하기
                 _context.YearAversges.AddRange(listYearAverages);
 
             }
